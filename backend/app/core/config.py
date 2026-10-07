@@ -9,7 +9,7 @@ class Settings(BaseSettings):
     DEBUG: bool = False
 
     # Supabase Configuration
-    SUPABASE_URL: str = "https://placeholder-project.supabase.co"
+    SUPABASE_URL: str = "https://udncpejresbvgqksedip.supabase.co"
     SUPABASE_KEY: str = "placeholder-anon-key"
     SUPABASE_SERVICE_ROLE_KEY: str = "placeholder-service-role-key"
     SUPABASE_JWT_SECRET: str = "placeholder-jwt-secret"
