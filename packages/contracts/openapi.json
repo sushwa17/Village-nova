@@ -1,0 +1,234 @@
+{
+  "openapi": "3.1.0",
+  "info": {
+    "title": "VillageNova API Contract",
+    "description": "Standardized OpenAPI contract for VillageNova Mobile Client, Backend Services, and AI Orchestration.",
+    "version": "1.0.0"
+  },
+  "servers": [
+    {
+      "url": "http://localhost:8000/v1",
+      "description": "Local Development Server"
+    }
+  ],
+  "paths": {
+    "/health": {
+      "get": {
+        "summary": "Service Health Check",
+        "operationId": "healthCheck",
+        "responses": {
+          "200": {
+            "description": "Service is healthy and operational",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HealthCheckResponse"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/me": {
+      "get": {
+        "summary": "Get Resident Profile",
+        "operationId": "getResidentProfile",
+        "security": [{ "BearerAuth": [] }],
+        "responses": {
+          "200": {
+            "description": "Resident profile data",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ResidentProfileResponse"
+                }
+              }
+            }
+          },
+          "401": { "description": "Unauthorized" }
+        }
+      }
+    },
+    "/onboarding": {
+      "post": {
+        "summary": "Complete Resident Onboarding",
+        "operationId": "completeOnboarding",
+        "security": [{ "BearerAuth": [] }],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/OnboardingRequest"
+              }
+            }
+          }
+        },
+        "responses": {
+          "201": { "description": "Onboarding completed successfully" },
+          "400": { "description": "Validation error" }
+        }
+      }
+    },
+    "/home": {
+      "get": {
+        "summary": "Aggregated Home Dashboard",
+        "operationId": "getHomeDashboard",
+        "security": [{ "BearerAuth": [] }],
+        "responses": {
+          "200": {
+            "description": "Dynamic Home screen payload",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HomeDashboardResponse"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/ask": {
+      "post": {
+        "summary": "Ask VillageNova AI Orchestrator",
+        "operationId": "askVillageNova",
+        "security": [{ "BearerAuth": [] }],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/AskRequest"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Structured AI card response with action buttons",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/AskResponse"
+                }
+              }
+            }
+          }
+        }
+      }
+    }
+  },
+  "components": {
+    "securitySchemes": {
+      "BearerAuth": {
+        "type": "http",
+        "scheme": "bearer",
+        "bearerFormat": "JWT"
+      }
+    },
+    "schemas": {
+      "HealthCheckResponse": {
+        "type": "object",
+        "properties": {
+          "status": { "type": "string", "example": "healthy" },
+          "version": { "type": "string", "example": "1.0.0" },
+          "environment": { "type": "string", "example": "development" },
+          "timestamp": { "type": "string", "format": "date-time" }
+        },
+        "required": ["status", "version", "environment", "timestamp"]
+      },
+      "ResidentProfileResponse": {
+        "type": "object",
+        "properties": {
+          "id": { "type": "string", "format": "uuid" },
+          "full_name": { "type": "string", "example": "Ravi Kumar" },
+          "preferred_language": { "type": "string", "example": "te" },
+          "village_name": { "type": "string", "example": "Ananthagiri" },
+          "roles": {
+            "type": "array",
+            "items": { "type": "string", "example": "farmer" }
+          }
+        },
+        "required": ["id", "full_name", "preferred_language", "roles"]
+      },
+      "OnboardingRequest": {
+        "type": "object",
+        "properties": {
+          "full_name": { "type": "string", "example": "Ravi Kumar" },
+          "village_id": { "type": "string", "format": "uuid" },
+          "preferred_language": { "type": "string", "example": "te" },
+          "roles": {
+            "type": "array",
+            "items": { "type": "string", "example": "farmer" }
+          }
+        },
+        "required": ["full_name", "village_id", "preferred_language", "roles"]
+      },
+      "HomeDashboardResponse": {
+        "type": "object",
+        "properties": {
+          "greeting": { "type": "string", "example": "Good Morning, Ravi 👋" },
+          "village_name": { "type": "string", "example": "Ananthagiri" },
+          "today_actions": {
+            "type": "array",
+            "items": {
+              "type": "object",
+              "properties": {
+                "id": { "type": "string" },
+                "title": { "type": "string" },
+                "action_type": { "type": "string" }
+              }
+            }
+          },
+          "progress_percentage": { "type": "integer", "example": 75 },
+          "weather_summary": { "type": "string", "example": "Rain expected this evening" },
+          "village_updates_count": { "type": "integer", "example": 3 },
+          "scheme_matches_count": { "type": "integer", "example": 2 }
+        },
+        "required": ["greeting", "village_name", "today_actions", "progress_percentage"]
+      },
+      "AskRequest": {
+        "type": "object",
+        "properties": {
+          "message": { "type": "string", "example": "What should I do on my farm today?" },
+          "conversation_id": { "type": "string", "format": "uuid", "nullable": true }
+        },
+        "required": ["message"]
+      },
+      "AskResponse": {
+        "type": "object",
+        "properties": {
+          "message": { "type": "string", "example": "Your soybean crop is in the vegetative stage. Rain is expected tonight." },
+          "actions": {
+            "type": "array",
+            "items": {
+              "type": "object",
+              "properties": {
+                "id": { "type": "string" },
+                "title": { "type": "string" },
+                "action_type": { "type": "string" }
+              }
+            }
+          },
+          "sources": {
+            "type": "array",
+            "items": {
+              "type": "object",
+              "properties": {
+                "title": { "type": "string" },
+                "source_type": { "type": "string" }
+              }
+            }
+          },
+          "follow_up_questions": {
+            "type": "array",
+            "items": { "type": "string" }
+          }
+        },
+        "required": ["message", "actions"]
+      }
+    }
+  }
+}
