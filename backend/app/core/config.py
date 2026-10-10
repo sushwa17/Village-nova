@@ -11,6 +11,7 @@ class Settings(BaseSettings):
     # Supabase Configuration
     SUPABASE_URL: str = "https://udncpejresbvgqksedip.supabase.co"
     SUPABASE_KEY: str = "placeholder-anon-key"
+    SUPABASE_ANON_KEY: str = ""
     SUPABASE_SERVICE_ROLE_KEY: str = "placeholder-service-role-key"
     SUPABASE_JWT_SECRET: str = "placeholder-jwt-secret"
 
@@ -28,7 +29,7 @@ class Settings(BaseSettings):
     CORS_ORIGINS: List[str] = ["*"]
 
     model_config = SettingsConfigDict(
-        env_file=".env",
+        env_file=(".env", "../.env"),
         env_file_encoding="utf-8",
         extra="ignore"
     )

@@ -1,8 +1,10 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:villagenova/core/theme/app_colors.dart';
 import 'package:villagenova/widgets/stitch_button.dart';
+import 'package:villagenova/providers/auth_provider.dart';
 
-class PhoneAuthScreen extends StatefulWidget {
+class PhoneAuthScreen extends ConsumerStatefulWidget {
   final VoidCallback onAuthSuccess;
 
   const PhoneAuthScreen({
@@ -11,15 +13,21 @@ class PhoneAuthScreen extends StatefulWidget {
   });
 
   @override
-  State<PhoneAuthScreen> createState() => _PhoneAuthScreenState();
+  ConsumerState<PhoneAuthScreen> createState() => _PhoneAuthScreenState();
 }
 
-class _PhoneAuthScreenState extends State<PhoneAuthScreen> {
+class _PhoneAuthScreenState extends ConsumerState<PhoneAuthScreen> {
   final TextEditingController phoneController = TextEditingController();
   final TextEditingController otpController = TextEditingController();
 
   bool isOtpSent = false;
-  bool isLoading = false;
+
+  @override
+  void dispose() {
+    phoneController.dispose();
+    otpController.dispose();
+    super.dispose();
+  }
 
   void handleSendOtp() async {
     if (phoneController.text.length < 10) {
@@ -29,11 +37,8 @@ class _PhoneAuthScreenState extends State<PhoneAuthScreen> {
       return;
     }
 
-    setState(() => isLoading = true);
-    // Simulate / Trigger Supabase Phone OTP send
-    await Future.delayed(const Duration(milliseconds: 600));
+    await ref.read(authProvider.notifier).sendOtp(phoneController.text);
     setState(() {
-      isLoading = false;
       isOtpSent = true;
     });
   }
@@ -46,15 +51,15 @@ class _PhoneAuthScreenState extends State<PhoneAuthScreen> {
       return;
     }
 
-    setState(() => isLoading = true);
-    // Simulate / Verify Supabase OTP
-    await Future.delayed(const Duration(milliseconds: 600));
-    setState(() => isLoading = false);
+    await ref.read(authProvider.notifier).verifyOtp(otpController.text);
     widget.onAuthSuccess();
   }
 
   @override
   Widget build(BuildContext context) {
+    final authState = ref.watch(authProvider);
+    final isLoading = authState.status == AuthStatus.loading;
+
     return Scaffold(
       backgroundColor: AppColors.backgroundLight,
       appBar: AppBar(

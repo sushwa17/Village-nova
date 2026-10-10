@@ -1,66 +1,37 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:villagenova/core/theme/app_colors.dart';
 import 'package:villagenova/widgets/stitch_card.dart';
+import 'package:villagenova/providers/ask_provider.dart';
 
-class AskVillageNovaScreen extends StatefulWidget {
+class AskVillageNovaScreen extends ConsumerStatefulWidget {
   const AskVillageNovaScreen({super.key});
 
   @override
-  State<AskVillageNovaScreen> createState() => _AskVillageNovaScreenState();
+  ConsumerState<AskVillageNovaScreen> createState() => _AskVillageNovaScreenState();
 }
 
-class _AskVillageNovaScreenState extends State<AskVillageNovaScreen> {
+class _AskVillageNovaScreenState extends ConsumerState<AskVillageNovaScreen> {
   final TextEditingController inputController = TextEditingController();
-  final List<Map<String, dynamic>> messages = [
-    {
-      'isUser': false,
-      'text': 'Good morning Ravi! 👋 I am your VillageNova companion. What would you like guidance on today?',
-      'actions': [],
-    },
-    {
-      'isUser': true,
-      'text': 'What should I do on my farm today?',
-      'actions': [],
-    },
-    {
-      'isUser': false,
-      'text': 'Your Soybean crop is currently at Day 42 (Vegetative stage). Here are your recommended actions for today:',
-      'actions': [
-        {'id': '1', 'title': '💧 Check soil moisture before evening rain', 'type': 'irrigation'},
-        {'id': '2', 'title': '🌱 Inspect leaves for yellow mosaic spots', 'type': 'crop_health'},
-        {'id': '3', 'title': '📷 Record a crop observation photo', 'type': 'observation'},
-      ],
-      'why': 'Rain is forecasted in Ananthagiri at 6:00 PM (14 mm). Checking moisture now prevents root over-saturation.',
-      'source': 'Open-Meteo & PJTSAU Agriculture Advisory • Today 11:30 AM',
-    },
-  ];
+
+  @override
+  void dispose() {
+    inputController.dispose();
+    super.dispose();
+  }
 
   void handleSend(String query) {
     if (query.trim().isEmpty) return;
-    setState(() {
-      messages.add({'isUser': true, 'text': query, 'actions': []});
-      inputController.clear();
-    });
-
-    // Simulate smart structured AI response
-    Future.delayed(const Duration(milliseconds: 700), () {
-      setState(() {
-        messages.add({
-          'isUser': false,
-          'text': 'I checked your farm records and today\'s local mandi rates for Vikarabad:',
-          'actions': [
-            {'id': '4', 'title': '💰 Mandi rate for Soybean: ₹4,850 / Quintal (+₹70 today)', 'type': 'mandi'},
-            {'id': '5', 'title': '🌾 View nearest mandi arrivals (14 km)', 'type': 'navigation'},
-          ],
-          'why': 'Soybean demand is stable across Telangana APMC markets.',
-          'source': 'AGMARKNET Mandi Price Feed • Updated 2 hours ago',
-        });
-      });
-    });
+    inputController.clear();
+    ref.read(askProvider.notifier).sendQuery(query);
   }
 
   @override
   Widget build(BuildContext context) {
+    final askState = ref.watch(askProvider);
+    final messages = askState.messages;
+    final isLoading = askState.isLoading;
+
     return Scaffold(
       backgroundColor: AppColors.backgroundLight,
       appBar: AppBar(
@@ -86,11 +57,40 @@ class _AskVillageNovaScreenState extends State<AskVillageNovaScreen> {
           Expanded(
             child: ListView.builder(
               padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
-              itemCount: messages.length,
+              itemCount: messages.length + (isLoading ? 1 : 0),
               itemBuilder: (context, index) {
+                if (index == messages.length) {
+                  return Align(
+                    alignment: Alignment.centerLeft,
+                    child: Container(
+                      margin: const EdgeInsets.only(bottom: 16, right: 48),
+                      padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 10),
+                      decoration: BoxDecoration(
+                        color: Colors.white,
+                        borderRadius: BorderRadius.circular(16),
+                        border: Border.all(color: const Color(0xFFE5E7EB)),
+                      ),
+                      child: Row(
+                        mainAxisSize: MainAxisSize.min,
+                        children: const [
+                          SizedBox(
+                            width: 14,
+                            height: 14,
+                            child: CircularProgressIndicator(strokeWidth: 2, color: AppColors.primaryGreen),
+                          ),
+                          SizedBox(width: 8),
+                          Text(
+                            'VillageNova is thinking...',
+                            style: TextStyle(fontSize: 13, color: AppColors.textSecondary, fontStyle: FontStyle.italic),
+                          ),
+                        ],
+                      ),
+                    ),
+                  );
+                }
                 final msg = messages[index];
-                if (msg['isUser'] as bool) {
-                  return _buildUserBubble(msg['text'] as String);
+                if (msg.isUser) {
+                  return _buildUserBubble(msg.text);
                 } else {
                   return _buildAIStructuredCard(msg);
                 }
@@ -152,10 +152,10 @@ class _AskVillageNovaScreenState extends State<AskVillageNovaScreen> {
     );
   }
 
-  Widget _buildAIStructuredCard(Map<String, dynamic> msg) {
-    final actions = (msg['actions'] as List<dynamic>?) ?? [];
-    final why = msg['why'] as String?;
-    final source = msg['source'] as String?;
+  Widget _buildAIStructuredCard(ChatMessageItem msg) {
+    final actions = msg.actions;
+    final why = msg.whyAdvisory;
+    final source = msg.sourceCitation;
 
     return Container(
       margin: const EdgeInsets.only(bottom: 16, right: 24),
@@ -174,7 +174,7 @@ class _AskVillageNovaScreenState extends State<AskVillageNovaScreen> {
             ),
             const SizedBox(height: 8),
             Text(
-              msg['text'] as String,
+              msg.text,
               style: const TextStyle(fontSize: 14.5, height: 1.4, color: AppColors.textPrimary),
             ),
 

@@ -1,9 +1,12 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:villagenova/core/theme/app_colors.dart';
 import 'package:villagenova/widgets/stitch_card.dart';
 import 'package:villagenova/widgets/voice_mic_fab.dart';
+import 'package:villagenova/providers/home_provider.dart';
+import 'package:villagenova/models/resident_model.dart';
 
-class HomeScreen extends StatefulWidget {
+class HomeScreen extends ConsumerStatefulWidget {
   final VoidCallback onOpenAskAI;
   final VoidCallback onOpenMySpace;
   final VoidCallback onOpenVillage;
@@ -18,42 +21,25 @@ class HomeScreen extends StatefulWidget {
   });
 
   @override
-  State<HomeScreen> createState() => _HomeScreenState();
+  ConsumerState<HomeScreen> createState() => _HomeScreenState();
 }
 
-class _HomeScreenState extends State<HomeScreen> {
+class _HomeScreenState extends ConsumerState<HomeScreen> {
   int _navIndex = 0;
 
-  // Sample dynamic actions state
-  final List<Map<String, dynamic>> todayActions = [
-    {
-      'id': '1',
-      'title': 'Check soil moisture before evening rain',
-      'tag': '💧 Irrigation',
-      'completed': true,
-    },
-    {
-      'id': '2',
-      'title': 'Inspect soybean leaves for yellow spots',
-      'tag': '🌱 Crop Health',
-      'completed': false,
-    },
-    {
-      'id': '3',
-      'title': 'Upload weekly farm observation photo',
-      'tag': '📷 Record',
-      'completed': false,
-    },
-  ];
-
-  void toggleAction(int index) {
-    setState(() {
-      todayActions[index]['completed'] = !todayActions[index]['completed'];
+  @override
+  void initState() {
+    super.initState();
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      ref.read(homeProvider.notifier).fetchHomeDashboard();
     });
   }
 
   @override
   Widget build(BuildContext context) {
+    final homeState = ref.watch(homeProvider);
+    final dashboard = homeState.dashboard;
+
     return Scaffold(
       backgroundColor: AppColors.backgroundLight,
       body: SafeArea(
@@ -63,19 +49,19 @@ class _HomeScreenState extends State<HomeScreen> {
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
               // 1. Header Greeting & Location
-              _buildGreetingHeader(),
+              _buildGreetingHeader(dashboard),
               const SizedBox(height: 20),
 
               // 2. Weather Advisory Card
-              _buildWeatherCard(),
+              _buildWeatherCard(dashboard),
               const SizedBox(height: 16),
 
               // 3. Today's Actions Card (Central Action Hub)
-              _buildTodayActionsCard(),
+              _buildTodayActionsCard(dashboard),
               const SizedBox(height: 16),
 
               // 4. Progress Dashboard Card (RE-SHAPE inspired)
-              _buildProgressCard(),
+              _buildProgressCard(dashboard),
               const SizedBox(height: 16),
 
               // 5. Quick Activity Buttons
@@ -130,16 +116,16 @@ class _HomeScreenState extends State<HomeScreen> {
     );
   }
 
-  Widget _buildGreetingHeader() {
+  Widget _buildGreetingHeader(HomeDashboardModel? dashboard) {
     return Row(
       mainAxisAlignment: MainAxisAlignment.spaceBetween,
       children: [
         Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            const Text(
-              'Good morning, Ravi 👋',
-              style: TextStyle(
+            Text(
+              dashboard?.greeting ?? 'Good morning, Ravi 👋',
+              style: const TextStyle(
                 fontSize: 24,
                 fontWeight: FontWeight.w800,
                 color: AppColors.textPrimary,
@@ -148,12 +134,12 @@ class _HomeScreenState extends State<HomeScreen> {
             ),
             const SizedBox(height: 4),
             Row(
-              children: const [
-                Icon(Icons.location_on, size: 16, color: AppColors.primaryGreen),
-                SizedBox(width: 4),
+              children: [
+                const Icon(Icons.location_on, size: 16, color: AppColors.primaryGreen),
+                const SizedBox(width: 4),
                 Text(
-                  'Ananthagiri • Vikarabad',
-                  style: TextStyle(
+                  dashboard?.locationLabel ?? 'Ananthagiri • Vikarabad',
+                  style: const TextStyle(
                     fontSize: 14,
                     fontWeight: FontWeight.w500,
                     color: AppColors.textSecondary,
@@ -193,7 +179,7 @@ class _HomeScreenState extends State<HomeScreen> {
     );
   }
 
-  Widget _buildWeatherCard() {
+  Widget _buildWeatherCard(HomeDashboardModel? dashboard) {
     return StitchCard(
       backgroundColor: const Color(0xFFF0F7FF),
       borderColor: const Color(0xFFBAE6FD),
@@ -211,19 +197,19 @@ class _HomeScreenState extends State<HomeScreen> {
           Expanded(
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
-              children: const [
+              children: [
                 Text(
-                  'Rain Expected Today (6:00 PM)',
-                  style: TextStyle(
+                  dashboard?.weatherHeadline ?? 'Rain Expected Today (6:00 PM)',
+                  style: const TextStyle(
                     fontSize: 15,
                     fontWeight: FontWeight.w700,
                     color: Color(0xFF0369A1),
                   ),
                 ),
-                SizedBox(height: 2),
+                const SizedBox(height: 2),
                 Text(
-                  '14 mm forecast • Avoid irrigation this evening',
-                  style: TextStyle(
+                  dashboard?.weatherAdvisory ?? '14 mm forecast • Avoid irrigation this evening',
+                  style: const TextStyle(
                     fontSize: 13,
                     color: Color(0xFF075985),
                   ),
@@ -236,7 +222,9 @@ class _HomeScreenState extends State<HomeScreen> {
     );
   }
 
-  Widget _buildTodayActionsCard() {
+  Widget _buildTodayActionsCard(HomeDashboardModel? dashboard) {
+    final actions = dashboard?.todayActions ?? [];
+
     return StitchCard(
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
@@ -260,10 +248,8 @@ class _HomeScreenState extends State<HomeScreen> {
             ],
           ),
           const SizedBox(height: 12),
-          ...todayActions.asMap().entries.map((entry) {
-            final idx = entry.key;
-            final action = entry.value;
-            final isDone = action['completed'] as bool;
+          ...actions.map((action) {
+            final isDone = action.completed;
             return Container(
               margin: const EdgeInsets.only(bottom: 8),
               decoration: BoxDecoration(
@@ -278,10 +264,10 @@ class _HomeScreenState extends State<HomeScreen> {
                   value: isDone,
                   activeColor: AppColors.primaryGreen,
                   shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(5)),
-                  onChanged: (_) => toggleAction(idx),
+                  onChanged: (_) => ref.read(homeProvider.notifier).toggleAction(action.id),
                 ),
                 title: Text(
-                  action['title'],
+                  action.title,
                   style: TextStyle(
                     fontSize: 14,
                     fontWeight: FontWeight.w600,
@@ -296,7 +282,7 @@ class _HomeScreenState extends State<HomeScreen> {
                     borderRadius: BorderRadius.circular(8),
                   ),
                   child: Text(
-                    action['tag'],
+                    action.tag,
                     style: const TextStyle(fontSize: 11, fontWeight: FontWeight.w500, color: AppColors.textSecondary),
                   ),
                 ),
@@ -308,10 +294,11 @@ class _HomeScreenState extends State<HomeScreen> {
     );
   }
 
-  Widget _buildProgressCard() {
-    final completedCount = todayActions.where((a) => a['completed'] == true).length;
-    final totalCount = todayActions.length;
-    final percentage = (completedCount / totalCount * 100).toInt();
+  Widget _buildProgressCard(HomeDashboardModel? dashboard) {
+    final completedCount = dashboard?.completedTasks ?? 1;
+    final totalCount = dashboard?.totalTasks ?? 3;
+    final percentage = dashboard?.progressPercentage ?? 33;
+    final progressVal = totalCount > 0 ? (completedCount / totalCount).clamp(0.0, 1.0) : 0.0;
 
     return StitchCard(
       backgroundColor: const Color(0xFFFAF5FF),
@@ -345,7 +332,7 @@ class _HomeScreenState extends State<HomeScreen> {
           ClipRRect(
             borderRadius: BorderRadius.circular(8),
             child: LinearProgressIndicator(
-              value: completedCount / totalCount,
+              value: progressVal,
               minHeight: 10,
               backgroundColor: const Color(0xFFF3E8FF),
               valueColor: const AlwaysStoppedAnimation<Color>(Color(0xFF9333EA)),
