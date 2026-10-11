@@ -5,6 +5,7 @@ from app.api.v1.health import router as health_router
 from app.api.v1.resident import router as resident_router
 from app.api.v1.home import router as home_router
 from app.api.v1.ask import router as ask_router
+from app.api.v1.village import router as village_router
 
 app = FastAPI(
     title=settings.PROJECT_NAME,
@@ -29,6 +30,7 @@ app.include_router(health_router, prefix=settings.API_V1_PREFIX)
 app.include_router(resident_router, prefix=settings.API_V1_PREFIX)
 app.include_router(home_router, prefix=settings.API_V1_PREFIX)
 app.include_router(ask_router, prefix=settings.API_V1_PREFIX)
+app.include_router(village_router, prefix=settings.API_V1_PREFIX)
 
 
 @app.get("/")

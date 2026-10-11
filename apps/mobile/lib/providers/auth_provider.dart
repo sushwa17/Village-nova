@@ -70,6 +70,13 @@ class AuthNotifier extends StateNotifier<AuthState> {
     }
   }
 
+  void setResidentProfile(ResidentProfileModel profile) {
+    state = state.copyWith(
+      status: AuthStatus.authenticated,
+      resident: profile,
+    );
+  }
+
   void signOut() {
     state = const AuthState(status: AuthStatus.unauthenticated);
   }

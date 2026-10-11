@@ -4,6 +4,18 @@ from uuid import UUID
 from datetime import datetime
 
 
+class VillageOut(BaseModel):
+    id: UUID
+    name: str
+    mandal: str
+    district: str
+    state: str
+    pincode: Optional[str] = None
+
+    class Config:
+        from_attributes = True
+
+
 class ResidentRoleOut(BaseModel):
     id: UUID
     role: str
@@ -40,6 +52,7 @@ class FarmOnboardingInput(BaseModel):
 class OnboardingRequest(BaseModel):
     full_name: str
     village_id: Optional[UUID] = None
+    village_name: Optional[str] = None
     preferred_language: str = "en"
     roles: List[str] = Field(min_length=1)  # ['farmer', 'student', etc.]
     farm: Optional[FarmOnboardingInput] = None

@@ -1,10 +1,12 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:villagenova/core/theme/app_colors.dart';
 import 'package:villagenova/widgets/stitch_button.dart';
 import 'package:villagenova/widgets/stitch_card.dart';
 import 'package:villagenova/widgets/stitch_chip.dart';
+import 'package:villagenova/providers/onboarding_provider.dart';
 
-class OnboardingScreen extends StatefulWidget {
+class OnboardingScreen extends ConsumerStatefulWidget {
   final VoidCallback onOnboardingComplete;
 
   const OnboardingScreen({
@@ -13,15 +15,16 @@ class OnboardingScreen extends StatefulWidget {
   });
 
   @override
-  State<OnboardingScreen> createState() => _OnboardingScreenState();
+  ConsumerState<OnboardingScreen> createState() => _OnboardingScreenState();
 }
 
-class _OnboardingScreenState extends State<OnboardingScreen> {
+class _OnboardingScreenState extends ConsumerState<OnboardingScreen> {
   int currentStep = 1;
 
-  // Step 1: Resident Info & Location
+  // Step 1: Resident Info, Location & Language
   final TextEditingController nameController = TextEditingController(text: 'Ravi Kumar');
   String selectedVillage = 'Ananthagiri (Vikarabad)';
+  String selectedLanguage = 'te';
 
   // Step 2: Roles (Multi-select)
   final Set<String> selectedRoles = {'farmer'};
@@ -31,6 +34,13 @@ class _OnboardingScreenState extends State<OnboardingScreen> {
   String selectedSoil = 'black';
   String selectedWater = 'borewell';
   String selectedCrop = 'Soybean';
+
+  @override
+  void dispose() {
+    nameController.dispose();
+    landController.dispose();
+    super.dispose();
+  }
 
   final List<Map<String, String>> availableRoles = [
     {'id': 'farmer', 'label': 'Farmer', 'emoji': '🌾'},
@@ -54,7 +64,7 @@ class _OnboardingScreenState extends State<OnboardingScreen> {
   final List<String> waterSources = ['Borewell', 'Canal', 'Rainfed', 'Tank', 'Other'];
   final List<String> commonCrops = ['Soybean', 'Cotton', 'Paddy / Rice', 'Wheat', 'Maize', 'Chili', 'Gram'];
 
-  void nextStep() {
+  void nextStep() async {
     if (currentStep == 1) {
       if (nameController.text.trim().isEmpty) {
         ScaffoldMessenger.of(context).showSnackBar(
@@ -73,15 +83,33 @@ class _OnboardingScreenState extends State<OnboardingScreen> {
       if (selectedRoles.contains('farmer')) {
         setState(() => currentStep = 3);
       } else {
-        widget.onOnboardingComplete();
+        await _submit();
       }
     } else if (currentStep == 3) {
+      await _submit();
+    }
+  }
+
+  Future<void> _submit() async {
+    final success = await ref.read(onboardingProvider.notifier).submitOnboarding(
+      fullName: nameController.text.trim(),
+      villageName: selectedVillage,
+      preferredLanguage: selectedLanguage,
+      roles: selectedRoles.toList(),
+      farmLandAcres: double.tryParse(landController.text) ?? 2.5,
+      soilType: selectedSoil,
+      waterSource: selectedWater,
+      mainCrop: selectedCrop,
+    );
+    if (success && mounted) {
       widget.onOnboardingComplete();
     }
   }
 
   @override
   Widget build(BuildContext context) {
+    final onboardingState = ref.watch(onboardingProvider);
+
     return Scaffold(
       backgroundColor: AppColors.backgroundLight,
       appBar: AppBar(
@@ -114,7 +142,7 @@ class _OnboardingScreenState extends State<OnboardingScreen> {
 
               Expanded(
                 child: SingleChildScrollView(
-                  child: _buildCurrentStepView(),
+                  child: _buildCurrentStepView(onboardingState),
                 ),
               ),
 
@@ -123,7 +151,8 @@ class _OnboardingScreenState extends State<OnboardingScreen> {
                 text: currentStep == 3 || (!selectedRoles.contains('farmer') && currentStep == 2)
                     ? 'Complete & Open VillageNova →'
                     : 'Next Step →',
-                onPressed: nextStep,
+                isLoading: onboardingState.isSubmitting,
+                onPressed: onboardingState.isSubmitting ? () {} : nextStep,
               ),
               const SizedBox(height: 12),
             ],
@@ -133,8 +162,12 @@ class _OnboardingScreenState extends State<OnboardingScreen> {
     );
   }
 
-  Widget _buildCurrentStepView() {
+  Widget _buildCurrentStepView(OnboardingState onboardingState) {
     if (currentStep == 1) {
+      final villageOptions = onboardingState.availableVillages.contains(selectedVillage)
+          ? onboardingState.availableVillages
+          : [selectedVillage, ...onboardingState.availableVillages];
+
       return Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
@@ -156,15 +189,25 @@ class _OnboardingScreenState extends State<OnboardingScreen> {
           DropdownButtonFormField<String>(
             value: selectedVillage,
             decoration: const InputDecoration(labelText: 'Select Village'),
-            items: [
-              'Ananthagiri (Vikarabad)',
-              'Kondurg (Shadnagar)',
-              'Pardi (Wardha)',
-              'Other Village',
-            ].map((v) => DropdownMenuItem(value: v, child: Text(v))).toList(),
+            items: villageOptions.map((v) => DropdownMenuItem(value: v, child: Text(v))).toList(),
             onChanged: (val) {
               if (val != null) setState(() => selectedVillage = val);
             },
+          ),
+          const SizedBox(height: 20),
+          const Text(
+            'Preferred Language',
+            style: TextStyle(fontSize: 15, fontWeight: FontWeight.w600, color: AppColors.textPrimary),
+          ),
+          const SizedBox(height: 8),
+          Row(
+            children: [
+              _buildLanguageOption('te', 'తెలుగు (Telugu)'),
+              const SizedBox(width: 8),
+              _buildLanguageOption('hi', 'हिन्दी (Hindi)'),
+              const SizedBox(width: 8),
+              _buildLanguageOption('en', 'English'),
+            ],
           ),
         ],
       );
@@ -288,5 +331,31 @@ class _OnboardingScreenState extends State<OnboardingScreen> {
         ],
       );
     }
+  }
+
+  Widget _buildLanguageOption(String code, String label) {
+    final isSelected = selectedLanguage == code;
+    return GestureDetector(
+      onTap: () => setState(() => selectedLanguage = code),
+      child: Container(
+        padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 7),
+        decoration: BoxDecoration(
+          color: isSelected ? AppColors.primaryGreen.withOpacity(0.12) : Colors.white,
+          borderRadius: BorderRadius.circular(20),
+          border: Border.all(
+            color: isSelected ? AppColors.primaryGreen : const Color(0xFFE5E7EB),
+            width: isSelected ? 1.5 : 1.0,
+          ),
+        ),
+        child: Text(
+          label,
+          style: TextStyle(
+            fontSize: 12,
+            fontWeight: isSelected ? FontWeight.w700 : FontWeight.w500,
+            color: isSelected ? AppColors.primaryGreenDark : AppColors.textPrimary,
+          ),
+        ),
+      ),
+    );
   }
 }
