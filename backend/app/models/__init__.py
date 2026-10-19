@@ -3,7 +3,7 @@ from app.models.farm import Farm, Crop, CropActivity, CropObservation, FarmExpen
 from app.models.village import VillageUpdate
 from app.models.scheme import Scheme, SchemeMatch
 from app.models.task import Task
-from app.models.conversation import Conversation, Message
+from app.models.conversation import Conversation, Message, AIToolCall
 
 __all__ = [
     "Village",
@@ -20,4 +20,5 @@ __all__ = [
     "Task",
     "Conversation",
     "Message",
+    "AIToolCall",
 ]

@@ -7,6 +7,7 @@ import os
 import sys
 
 from app.core.config import settings
+from app.agents.dispatcher import ToolDispatcher
 
 logger = logging.getLogger(__name__)
 
@@ -45,6 +46,7 @@ class AIOrchestrator:
         self.api_key = api_key
         self.model_name = model_name
         self._genai_client = None
+        self.dispatcher = ToolDispatcher.get_default()
 
     def _get_client(self):
         if not self._genai_client and self.api_key and not self.api_key.startswith("placeholder"):

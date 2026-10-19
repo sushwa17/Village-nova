@@ -1393,7 +1393,7 @@
               <div class="space-y-1.5 pt-1">
                 <p class="text-[10px] font-extrabold text-slate-400 uppercase tracking-wider">Recommended Actions:</p>
                 ${actions.map(act => `
-                  <div onclick="if('${act.badge}'==='Farm Space' || '${act.badge}'==='Observation') setScreen('space'); else if('${act.badge}'==='Community') setScreen('village');" class="p-2 bg-slate-50 hover:bg-emerald-50 rounded-xl border border-slate-200 hover:border-emerald-300 flex items-center justify-between cursor-pointer transition-all">
+                  <div onclick="executeActionCard('${act.badge}', '${act.title.replace(/'/g, "\\'")}', '${act.icon}')" class="p-2 bg-slate-50 hover:bg-emerald-50 rounded-xl border border-slate-200 hover:border-emerald-300 flex items-center justify-between cursor-pointer transition-all active:scale-98">
                     <div class="flex items-center gap-2">
                       <span class="text-sm">${act.icon}</span>
                       <span class="text-xs font-semibold text-slate-800">${act.title}</span>
@@ -1420,6 +1420,45 @@
         chatStream.scrollTop = chatStream.scrollHeight;
       }, 550);
 
+      chatStream.scrollTop = chatStream.scrollHeight;
+    }
+
+    // Week 8 Interactive Action Card Execution Dispatcher
+    function executeActionCard(badge, title, icon) {
+      const chatStream = document.getElementById('chat-stream');
+      const actionFeedback = document.createElement('div');
+      actionFeedback.className = 'flex flex-col items-start gap-1 max-w-[90%] animate-fade-in';
+      
+      let msg = '';
+      if (badge === 'Irrigation' || badge === 'Crop Health' || badge === 'Weather Guard' || badge === 'Drainage') {
+        farmActivitiesCount++;
+        document.getElementById('space-total-activities').textContent = farmActivitiesCount + ' Logged';
+        document.getElementById('activity-badge-count').textContent = farmActivitiesCount + ' items';
+        msg = `⚡ <strong>Action Completed:</strong> Logged "<em>${title}</em>" into My Farm activity timeline!`;
+      } else if (badge === 'Market Trends' || badge === 'Logistics') {
+        msg = `📊 <strong>Mandi Intelligence:</strong> Loaded Vikarabad APMC live dispatch queue. Current rate: <strong>₹4,850/Q</strong>.`;
+      } else if (badge === 'Central Scheme' || badge === 'State Scheme' || badge === 'Documentation') {
+        msg = `🏛️ <strong>Scheme Verification:</strong> Required documents (Aadhaar & Passbook) validated. Ready for Gram Panchayat submission.`;
+      } else if (badge === 'Camera AI' || badge === 'Observation') {
+        setScreen('space');
+        promptFieldPhoto();
+        return;
+      } else if (badge === 'Farm Space') {
+        setScreen('space');
+        return;
+      } else if (badge === 'Community') {
+        setScreen('village');
+        return;
+      } else {
+        msg = `✓ Action "<em>${title}</em>" acknowledged and synchronized.`;
+      }
+
+      actionFeedback.innerHTML = `
+        <div class="p-2.5 bg-emerald-50 border border-emerald-300 rounded-xl text-xs text-emerald-900 shadow-2xs space-y-1">
+          <p class="font-bold flex items-center gap-1.5">${icon || '✓'} ${msg}</p>
+        </div>
+      `;
+      chatStream.appendChild(actionFeedback);
       chatStream.scrollTop = chatStream.scrollHeight;
     }
   </script>

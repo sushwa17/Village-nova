@@ -182,25 +182,29 @@ class _AskVillageNovaScreenState extends ConsumerState<AskVillageNovaScreen> {
               const SizedBox(height: 12),
               const Text('ACTIONS TO TAKE:', style: TextStyle(fontSize: 12, fontWeight: FontWeight.w800, color: AppColors.textMuted)),
               const SizedBox(height: 6),
-              ...actions.map((act) => Container(
-                    margin: const EdgeInsets.only(bottom: 6),
-                    padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 8),
-                    decoration: BoxDecoration(
-                      color: const Color(0xFFF9FAFB),
-                      borderRadius: BorderRadius.circular(10),
-                      border: Border.all(color: const Color(0xFFF3F4F6)),
-                    ),
-                    child: Row(
-                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                      children: [
-                        Expanded(
-                          child: Text(
-                            act['title'] as String,
-                            style: const TextStyle(fontSize: 13, fontWeight: FontWeight.w600, color: AppColors.textPrimary),
+              ...actions.map((act) => InkWell(
+                    borderRadius: BorderRadius.circular(10),
+                    onTap: () => ref.read(askProvider.notifier).executeAction(act),
+                    child: Container(
+                      margin: const EdgeInsets.only(bottom: 6),
+                      padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 8),
+                      decoration: BoxDecoration(
+                        color: const Color(0xFFF9FAFB),
+                        borderRadius: BorderRadius.circular(10),
+                        border: Border.all(color: const Color(0xFFF3F4F6)),
+                      ),
+                      child: Row(
+                        mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                        children: [
+                          Expanded(
+                            child: Text(
+                              act['title'] as String,
+                              style: const TextStyle(fontSize: 13, fontWeight: FontWeight.w600, color: AppColors.textPrimary),
+                            ),
                           ),
-                        ),
-                        const Icon(Icons.arrow_forward_ios, size: 12, color: AppColors.primaryGreen),
-                      ],
+                          const Icon(Icons.arrow_forward_ios, size: 12, color: AppColors.primaryGreen),
+                        ],
+                      ),
                     ),
                   )),
             ],
