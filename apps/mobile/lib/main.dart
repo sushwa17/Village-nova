@@ -7,6 +7,7 @@ import 'package:villagenova/features/onboarding/presentation/screens/onboarding_
 import 'package:villagenova/features/home/presentation/screens/home_screen.dart';
 import 'package:villagenova/features/ask/presentation/screens/ask_screen.dart';
 import 'package:villagenova/features/space/presentation/screens/my_space_screen.dart';
+import 'package:villagenova/features/village/presentation/screens/my_village_screen.dart';
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
@@ -68,8 +69,8 @@ class _VillageNovaAppState extends State<VillageNovaApp> {
                   );
                 },
                 onOpenVillage: () {
-                  ScaffoldMessenger.of(context).showSnackBar(
-                    const SnackBar(content: Text('My Village: 3 verified updates from Ananthagiri')),
+                  Navigator.of(context).push(
+                    MaterialPageRoute(builder: (_) => const MyVillageScreen()),
                   );
                 },
                 onOpenSchemes: () {

@@ -1,0 +1,1309 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>VillageNova Mobile UI Preview</title>
+  <script src="https://www.gstatic.com/antigravity/web/dev/tailwindcss.min.js"></script>
+  <style>
+    @import url('https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap');
+    body {
+      font-family: 'Plus Jakarta Sans', system-ui, -apple-system, sans-serif;
+    }
+    .custom-scrollbar::-webkit-scrollbar {
+      width: 4px;
+    }
+    .custom-scrollbar::-webkit-scrollbar-thumb {
+      background: #CBD5E1;
+      border-radius: 4px;
+    }
+  </style>
+</head>
+<body class="bg-slate-900 text-slate-100 min-h-screen p-4 flex flex-col items-center justify-start antialiased">
+
+  <!-- Header Controls & Screen Switcher -->
+  <header class="w-full max-w-md mb-4 text-center">
+    <div class="inline-flex items-center gap-2 px-3 py-1 bg-emerald-950/80 border border-emerald-600/40 rounded-full text-emerald-400 text-xs font-semibold uppercase tracking-wider mb-2">
+      <span class="w-2 h-2 rounded-full bg-emerald-400 animate-pulse"></span>
+      VillageNova Mobile UI Preview
+    </div>
+    <h1 class="text-xl font-bold text-white tracking-tight">Flutter Mobile Screen Simulator</h1>
+    <p class="text-xs text-slate-400 mt-1">Select a screen below or interact directly inside the phone frame:</p>
+
+    <!-- Navigation Pills -->
+    <div class="flex items-center justify-center gap-1.5 mt-3 overflow-x-auto pb-1">
+      <button onclick="setScreen('welcome')" id="pill-welcome" class="px-2.5 py-1 rounded-lg text-xs font-semibold bg-emerald-600 text-white transition-all shadow-sm">
+        1. Welcome
+      </button>
+      <button onclick="setScreen('auth')" id="pill-auth" class="px-2.5 py-1 rounded-lg text-xs font-semibold bg-slate-800 text-slate-300 hover:bg-slate-700 transition-all">
+        2. Auth & OTP
+      </button>
+      <button onclick="setScreen('onboarding')" id="pill-onboarding" class="px-2.5 py-1 rounded-lg text-xs font-semibold bg-slate-800 text-slate-300 hover:bg-slate-700 transition-all">
+        3. Onboarding
+      </button>
+      <button onclick="setScreen('home')" id="pill-home" class="px-2.5 py-1 rounded-lg text-xs font-semibold bg-slate-800 text-slate-300 hover:bg-slate-700 transition-all">
+        4. Home Hub
+      </button>
+      <button onclick="setScreen('ask')" id="pill-ask" class="px-2.5 py-1 rounded-lg text-xs font-semibold bg-slate-800 text-slate-300 hover:bg-slate-700 transition-all">
+        5. Ask AI
+      </button>
+      <button onclick="setScreen('space')" id="pill-space" class="px-2.5 py-1 rounded-lg text-xs font-semibold bg-slate-800 text-slate-300 hover:bg-slate-700 transition-all">
+        6. My Farm
+      </button>
+      <button onclick="setScreen('village')" id="pill-village" class="px-2.5 py-1 rounded-lg text-xs font-semibold bg-slate-800 text-slate-300 hover:bg-slate-700 transition-all">
+        7. Village
+      </button>
+    </div>
+  </header>
+
+  <!-- Mobile Device Shell -->
+  <div class="relative w-[385px] h-[780px] bg-black rounded-[48px] p-3 shadow-2xl border-4 border-slate-700 ring-1 ring-slate-800 flex flex-col overflow-hidden">
+    <!-- Camera Island / Notch -->
+    <div class="absolute top-4 left-1/2 -translate-x-1/2 w-28 h-5 bg-black rounded-full z-50 flex items-center justify-between px-3">
+      <div class="w-2.5 h-2.5 rounded-full bg-slate-900 border border-slate-800"></div>
+      <div class="w-2 h-2 rounded-full bg-emerald-600/60 animate-ping"></div>
+    </div>
+
+    <!-- Phone Screen Content (White background container) -->
+    <div id="phone-screen" class="w-full h-full bg-[#F8FAFC] text-slate-900 rounded-[38px] overflow-hidden flex flex-col relative">
+
+      <!-- Status Bar -->
+      <div class="h-10 px-6 pt-3 flex items-center justify-between text-xs font-bold text-slate-800 select-none z-40 bg-transparent">
+        <span>9:41</span>
+        <div class="flex items-center gap-1.5 text-slate-700">
+          <svg class="w-3.5 h-3.5" fill="currentColor" viewBox="0 0 24 24"><path d="M12 3c-4.97 0-9 4.03-9 9 0 2.12.74 4.07 1.97 5.61L4.35 18.25c-.39.39-.39 1.02 0 1.41.39.39 1.02.39 1.41 0l.64-.64C7.93 20.26 9.88 21 12 21c4.97 0 9-4.03 9-9s-4.03-9-9-9zm0 16c-3.87 0-7-3.13-7-7s3.13-7 7-7 7 3.13 7 7-3.13 7-7 7z"/></svg>
+          <svg class="w-3.5 h-3.5" fill="currentColor" viewBox="0 0 24 24"><path d="M2 17h20v2H2zm1.15-4.05L4 11.47l.85 1.48 1.3-.75-.85-1.48H7v-1.5H5.3l.85-1.48-1.3-.75L4 8.53l-.85-1.48-1.3.75.85 1.48H1v1.5h1.7l-.85 1.48z"/></svg>
+          <div class="w-5 h-2.5 border border-slate-700 rounded-sm p-0.5 flex items-center"><div class="w-full h-full bg-slate-800 rounded-2xs"></div></div>
+        </div>
+      </div>
+
+      <!-- ============================================ -->
+      <!-- SCREEN 1: WELCOME SCREEN                     -->
+      <!-- ============================================ -->
+      <div id="screen-welcome" class="screen-view flex-1 flex flex-col justify-between p-6">
+        <div class="flex-1 flex flex-col items-center justify-center text-center">
+          <div class="w-20 h-20 rounded-3xl bg-gradient-to-tr from-emerald-600 to-green-500 shadow-lg shadow-emerald-600/30 flex items-center justify-center mb-6">
+            <span class="text-4xl">🌾</span>
+          </div>
+          <span class="px-3 py-1 bg-emerald-100 text-emerald-800 font-bold text-xs rounded-full uppercase tracking-wider mb-2">Google Stitch Design System</span>
+          <h2 class="text-3xl font-extrabold text-slate-900 tracking-tight leading-tight">VillageNova</h2>
+          <p class="text-sm font-semibold text-emerald-700 mt-1">గ్రామీణ డిజిటల్ తోడు • Rural Intelligence</p>
+          <p class="text-xs text-slate-500 mt-4 leading-relaxed max-w-xs">
+            Personalized crop lifecycles, government scheme matching, hyperlocal weather alerts, and panchayat updates for every rural citizen.
+          </p>
+
+          <div class="grid grid-cols-2 gap-2 mt-6 w-full max-w-xs">
+            <div class="p-3 bg-white border border-slate-200 rounded-2xl shadow-2xs text-left">
+              <span class="text-lg">🌱</span>
+              <p class="text-xs font-bold text-slate-800 mt-1">Smart Krishi</p>
+              <p class="text-[11px] text-slate-500">Day 42 Crop Stage</p>
+            </div>
+            <div class="p-3 bg-white border border-slate-200 rounded-2xl shadow-2xs text-left">
+              <span class="text-lg">🏛️</span>
+              <p class="text-xs font-bold text-slate-800 mt-1">Schemes Hub</p>
+              <p class="text-[11px] text-slate-500">Instant Eligibility</p>
+            </div>
+          </div>
+        </div>
+
+        <div class="space-y-2 mt-4">
+          <button onclick="setScreen('auth')" class="w-full py-3.5 bg-emerald-700 hover:bg-emerald-800 text-white font-bold rounded-2xl shadow-md transition-all active:scale-[0.98] text-sm flex items-center justify-center gap-2">
+            Get Started (Sign In) →
+          </button>
+          <p class="text-[11px] text-slate-400 text-center">Protected by Supabase Phone Authentication</p>
+        </div>
+      </div>
+
+      <!-- ============================================ -->
+      <!-- SCREEN 2: PHONE & OTP AUTH                   -->
+      <!-- ============================================ -->
+      <div id="screen-auth" class="screen-view hidden flex-1 flex flex-col justify-between p-6">
+        <div>
+          <button onclick="setScreen('welcome')" class="text-slate-400 hover:text-slate-700 text-xs font-bold flex items-center gap-1 mb-4">
+            ← Back
+          </button>
+          <h2 class="text-2xl font-extrabold text-slate-900 tracking-tight">Resident Sign In</h2>
+          <p class="text-xs text-slate-500 mt-1">Enter your 10-digit mobile number to receive a secure OTP.</p>
+
+          <div class="mt-6 space-y-4">
+            <div>
+              <label class="block text-xs font-bold text-slate-700 mb-1.5">Mobile Number</label>
+              <div class="flex items-center bg-white border border-slate-200 rounded-2xl px-3.5 py-3 shadow-2xs focus-within:ring-2 focus-within:ring-emerald-600 focus-within:border-emerald-600">
+                <span class="text-sm font-bold text-slate-800 mr-2">+91</span>
+                <input type="tel" id="input-phone" value="9876543210" class="w-full text-sm font-semibold text-slate-900 bg-transparent outline-none tracking-wide" placeholder="9876543210">
+              </div>
+            </div>
+
+            <div id="otp-section" class="space-y-2">
+              <div class="flex justify-between items-center">
+                <label class="block text-xs font-bold text-slate-700">6-Digit SMS Code</label>
+                <span class="text-[11px] text-emerald-600 font-semibold cursor-pointer">Resend OTP</span>
+              </div>
+              <div class="flex justify-between gap-1.5">
+                <input maxlength="1" value="4" class="w-11 h-12 text-center text-lg font-bold bg-white border border-slate-300 rounded-xl focus:border-emerald-600 focus:ring-1 focus:ring-emerald-600 outline-none">
+                <input maxlength="1" value="2" class="w-11 h-12 text-center text-lg font-bold bg-white border border-slate-300 rounded-xl focus:border-emerald-600 focus:ring-1 focus:ring-emerald-600 outline-none">
+                <input maxlength="1" value="0" class="w-11 h-12 text-center text-lg font-bold bg-white border border-slate-300 rounded-xl focus:border-emerald-600 focus:ring-1 focus:ring-emerald-600 outline-none">
+                <input maxlength="1" value="9" class="w-11 h-12 text-center text-lg font-bold bg-white border border-slate-300 rounded-xl focus:border-emerald-600 focus:ring-1 focus:ring-emerald-600 outline-none">
+                <input maxlength="1" value="1" class="w-11 h-12 text-center text-lg font-bold bg-white border border-slate-300 rounded-xl focus:border-emerald-600 focus:ring-1 focus:ring-emerald-600 outline-none">
+                <input maxlength="1" value="5" class="w-11 h-12 text-center text-lg font-bold bg-white border border-slate-300 rounded-xl focus:border-emerald-600 focus:ring-1 focus:ring-emerald-600 outline-none">
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <div>
+          <button onclick="setScreen('onboarding')" class="w-full py-3.5 bg-emerald-700 hover:bg-emerald-800 text-white font-bold rounded-2xl shadow-md transition-all text-sm flex items-center justify-center gap-2">
+            Verify & Continue →
+          </button>
+        </div>
+      </div>
+
+      <!-- ============================================ -->
+      <!-- SCREEN 3: PROGRESSIVE ONBOARDING (STEPS 1-3) -->
+      <!-- ============================================ -->
+      <div id="screen-onboarding" class="screen-view hidden flex-1 flex flex-col justify-between p-6 overflow-y-auto custom-scrollbar">
+        <div>
+          <!-- Step indicator bar -->
+          <div class="flex items-center justify-between text-xs font-bold text-slate-500 mb-2">
+            <span id="onboard-step-label">Step 1 of 3</span>
+            <span id="onboard-progress-pct" class="text-emerald-700">33%</span>
+          </div>
+          <div class="w-full h-1.5 bg-slate-200 rounded-full overflow-hidden mb-5">
+            <div id="onboard-progress-bar" class="w-1/3 h-full bg-emerald-600 transition-all duration-300"></div>
+          </div>
+
+          <!-- Onboarding Sub-Step 1: Resident & Location -->
+          <div id="onboard-step-1" class="space-y-4">
+            <div>
+              <h2 class="text-xl font-extrabold text-slate-900 tracking-tight">Where do you live?</h2>
+              <p class="text-xs text-slate-500 mt-1">We personalize weather, soil, and panchayat updates based on your village.</p>
+            </div>
+
+            <div>
+              <label class="block text-xs font-bold text-slate-700 mb-1">Your Full Name</label>
+              <input type="text" id="ob-name" value="Ravi Kumar" class="w-full text-sm font-semibold bg-white border border-slate-200 rounded-xl px-3.5 py-2.5 outline-none focus:border-emerald-600">
+            </div>
+
+            <div>
+              <label class="block text-xs font-bold text-slate-700 mb-1">Select Village (from Backend)</label>
+              <select id="ob-village" class="w-full text-sm font-semibold bg-white border border-slate-200 rounded-xl px-3 py-2.5 outline-none focus:border-emerald-600">
+                <option value="Ananthagiri">Ananthagiri (Vikarabad Mandal)</option>
+                <option value="Dharur">Dharur (Dharur Mandal)</option>
+                <option value="Kotepally">Kotepally (Kotepally Mandal)</option>
+                <option value="Nawabpet">Nawabpet (Nawabpet Mandal)</option>
+                <option value="Parigi">Parigi (Parigi Mandal)</option>
+                <option value="Kondurg">Kondurg (Rangareddy)</option>
+              </select>
+            </div>
+
+            <div>
+              <label class="block text-xs font-bold text-slate-700 mb-1">Preferred Language</label>
+              <div class="flex gap-2">
+                <button type="button" class="px-3 py-1.5 text-xs font-bold bg-emerald-100 text-emerald-800 border border-emerald-500 rounded-lg">తెలుగు (Telugu)</button>
+                <button type="button" class="px-3 py-1.5 text-xs font-medium bg-white text-slate-700 border border-slate-200 rounded-lg">हिन्दी (Hindi)</button>
+                <button type="button" class="px-3 py-1.5 text-xs font-medium bg-white text-slate-700 border border-slate-200 rounded-lg">English</button>
+              </div>
+            </div>
+          </div>
+
+          <!-- Onboarding Sub-Step 2: Persona Roles -->
+          <div id="onboard-step-2" class="space-y-4 hidden">
+            <div>
+              <h2 class="text-xl font-extrabold text-slate-900 tracking-tight">What describes you?</h2>
+              <p class="text-xs text-slate-500 mt-1">Select all that apply. Your dashboard adapts to your roles.</p>
+            </div>
+
+            <div class="grid grid-cols-2 gap-2 text-xs">
+              <label class="p-3 bg-emerald-50 border-2 border-emerald-600 rounded-xl flex items-center gap-2 cursor-pointer">
+                <input type="checkbox" checked class="accent-emerald-600">
+                <span class="font-bold text-slate-900">🌾 Farmer</span>
+              </label>
+              <label class="p-3 bg-white border border-slate-200 rounded-xl flex items-center gap-2 cursor-pointer">
+                <input type="checkbox" class="accent-emerald-600">
+                <span class="font-medium text-slate-800">🐄 Cattle Owner</span>
+              </label>
+              <label class="p-3 bg-white border border-slate-200 rounded-xl flex items-center gap-2 cursor-pointer">
+                <input type="checkbox" class="accent-emerald-600">
+                <span class="font-medium text-slate-800">🎓 Student</span>
+              </label>
+              <label class="p-3 bg-white border border-slate-200 rounded-xl flex items-center gap-2 cursor-pointer">
+                <input type="checkbox" class="accent-emerald-600">
+                <span class="font-medium text-slate-800">💼 Job Seeker</span>
+              </label>
+              <label class="p-3 bg-white border border-slate-200 rounded-xl flex items-center gap-2 cursor-pointer">
+                <input type="checkbox" class="accent-emerald-600">
+                <span class="font-medium text-slate-800">👩 SHG / Credit</span>
+              </label>
+              <label class="p-3 bg-white border border-slate-200 rounded-xl flex items-center gap-2 cursor-pointer">
+                <input type="checkbox" class="accent-emerald-600">
+                <span class="font-medium text-slate-800">🏪 Shop Owner</span>
+              </label>
+            </div>
+          </div>
+
+          <!-- Onboarding Sub-Step 3: Farm Details -->
+          <div id="onboard-step-3" class="space-y-4 hidden">
+            <div>
+              <h2 class="text-xl font-extrabold text-slate-900 tracking-tight">Tell us about your farm</h2>
+              <p class="text-xs text-slate-500 mt-1">We predict stages, irrigation needs, and fertilizer schedules.</p>
+            </div>
+
+            <div class="grid grid-cols-2 gap-2">
+              <div>
+                <label class="block text-xs font-bold text-slate-700 mb-1">Land (Acres)</label>
+                <input type="number" id="ob-acres" value="2.5" class="w-full text-sm font-semibold bg-white border border-slate-200 rounded-xl px-3 py-2 outline-none focus:border-emerald-600">
+              </div>
+              <div>
+                <label class="block text-xs font-bold text-slate-700 mb-1">Soil Type</label>
+                <select id="ob-soil" class="w-full text-sm font-semibold bg-white border border-slate-200 rounded-xl px-3 py-2 outline-none focus:border-emerald-600">
+                  <option value="black">Black Soil (నల్ల రేగడి)</option>
+                  <option value="red">Red Soil (ఎర్ర నేల)</option>
+                  <option value="loamy">Loamy Soil</option>
+                </select>
+              </div>
+            </div>
+
+            <div>
+              <label class="block text-xs font-bold text-slate-700 mb-1">Main Active Crop</label>
+              <select id="ob-crop" class="w-full text-sm font-semibold bg-white border border-slate-200 rounded-xl px-3 py-2 outline-none focus:border-emerald-600">
+                <option value="Soybean">Soybean (సోయాబీన్)</option>
+                <option value="Cotton">Cotton (పత్తి)</option>
+                <option value="Paddy">Paddy / Rice (వరి)</option>
+                <option value="Red Gram">Red Gram (కందులు)</option>
+              </select>
+            </div>
+
+            <div class="p-3 bg-emerald-50 border border-emerald-200 rounded-xl text-xs text-emerald-800 flex items-start gap-2">
+              <span class="text-base">📅</span>
+              <p>Sowing date is set to <strong>Day 42 (Vegetative Stage)</strong>. Initial daily actions will be generated automatically!</p>
+            </div>
+          </div>
+        </div>
+
+        <div class="mt-4 pt-2 border-t border-slate-100 flex gap-2">
+          <button id="ob-prev-btn" onclick="prevOnboardStep()" class="hidden px-4 py-3 bg-slate-100 hover:bg-slate-200 text-slate-700 font-bold rounded-2xl text-xs">
+            Back
+          </button>
+          <button id="ob-next-btn" onclick="nextOnboardStep()" class="flex-1 py-3 bg-emerald-700 hover:bg-emerald-800 text-white font-bold rounded-2xl text-xs shadow-md">
+            Next Step →
+          </button>
+        </div>
+      </div>
+
+      <!-- ============================================ -->
+      <!-- SCREEN 4: HOME DASHBOARD (CENTRAL ACTION HUB)-->
+      <!-- ============================================ -->
+      <div id="screen-home" class="screen-view hidden flex-1 flex flex-col justify-between overflow-hidden">
+        <!-- Scrollable Body -->
+        <div class="flex-1 overflow-y-auto p-5 space-y-4 custom-scrollbar">
+
+          <!-- Header Greeting -->
+          <div class="flex items-center justify-between">
+            <div>
+              <h2 id="home-greeting" class="text-lg font-extrabold text-slate-900 tracking-tight">Good morning, Ravi 👋</h2>
+              <div class="flex items-center gap-1 text-xs text-emerald-700 font-semibold mt-0.5">
+                <span>📍</span>
+                <span id="home-location">Ananthagiri • Vikarabad</span>
+              </div>
+            </div>
+            <button onclick="setScreen('ask')" class="px-2.5 py-1.5 bg-emerald-50 border border-emerald-300 text-emerald-800 rounded-full text-xs font-bold flex items-center gap-1 shadow-2xs hover:bg-emerald-100 transition-all">
+              <span>✨</span> Ask AI
+            </button>
+          </div>
+
+          <!-- Hyperlocal Weather Advisory Card (Stitch Token) -->
+          <div class="p-3.5 bg-sky-50 border border-sky-200 rounded-2xl shadow-2xs flex items-center gap-3">
+            <div class="w-10 h-10 rounded-xl bg-sky-100 text-sky-600 flex items-center justify-center text-xl shrink-0">
+              🌧️
+            </div>
+            <div>
+              <p class="text-xs font-bold text-sky-900">Rain Expected Today (6:00 PM)</p>
+              <p class="text-[11px] text-sky-700 mt-0.5 leading-snug">14 mm forecast • Avoid irrigation & spraying operations this evening.</p>
+            </div>
+          </div>
+
+          <!-- Today's Actions Card (Interactive Checkboxes) -->
+          <div class="p-4 bg-white border border-slate-200 rounded-2xl shadow-2xs space-y-3">
+            <div class="flex items-center justify-between">
+              <span class="text-xs font-extrabold uppercase tracking-wider text-slate-500">Today's Actions</span>
+              <span class="text-[11px] font-bold text-emerald-700 bg-emerald-50 px-2 py-0.5 rounded-md">Soybean • Day 42</span>
+            </div>
+
+            <div class="space-y-2" id="tasks-list">
+              <!-- Task 1 -->
+              <label class="flex items-center justify-between p-2.5 bg-slate-50 hover:bg-slate-100/80 rounded-xl border border-slate-100 cursor-pointer transition-all">
+                <div class="flex items-center gap-2.5">
+                  <input type="checkbox" checked onchange="toggleTask(this)" class="task-checkbox w-4 h-4 rounded text-emerald-600 accent-emerald-600">
+                  <span class="text-xs font-medium text-slate-500 line-through task-title">Check soil moisture before evening rain</span>
+                </div>
+                <span class="text-[10px] font-bold text-sky-700 bg-sky-100 px-1.5 py-0.5 rounded">💧 Irrigation</span>
+              </label>
+
+              <!-- Task 2 -->
+              <label class="flex items-center justify-between p-2.5 bg-white hover:bg-slate-50 rounded-xl border border-slate-200 cursor-pointer transition-all">
+                <div class="flex items-center gap-2.5">
+                  <input type="checkbox" onchange="toggleTask(this)" class="task-checkbox w-4 h-4 rounded text-emerald-600 accent-emerald-600">
+                  <span class="text-xs font-semibold text-slate-800 task-title">Inspect soybean leaves for yellow spots</span>
+                </div>
+                <span class="text-[10px] font-bold text-emerald-700 bg-emerald-100 px-1.5 py-0.5 rounded">🌱 Crop</span>
+              </label>
+
+              <!-- Task 3 -->
+              <label class="flex items-center justify-between p-2.5 bg-white hover:bg-slate-50 rounded-xl border border-slate-200 cursor-pointer transition-all">
+                <div class="flex items-center gap-2.5">
+                  <input type="checkbox" onchange="toggleTask(this)" class="task-checkbox w-4 h-4 rounded text-emerald-600 accent-emerald-600">
+                  <span class="text-xs font-semibold text-slate-800 task-title">Upload weekly crop observation photo</span>
+                </div>
+                <span class="text-[10px] font-bold text-purple-700 bg-purple-100 px-1.5 py-0.5 rounded">📷 Photo</span>
+              </label>
+            </div>
+          </div>
+
+          <!-- Progress Dashboard Card (RE-SHAPE metric) -->
+          <div class="p-3.5 bg-purple-50/70 border border-purple-200 rounded-2xl shadow-2xs space-y-2">
+            <div class="flex items-center justify-between">
+              <span class="text-xs font-extrabold text-purple-900 uppercase tracking-wider">This Week Progress</span>
+              <span id="progress-percent" class="text-xs font-extrabold text-purple-700">33%</span>
+            </div>
+            <div class="w-full h-2 bg-purple-200 rounded-full overflow-hidden">
+              <div id="progress-bar-fill" class="w-1/3 h-full bg-purple-600 transition-all duration-300"></div>
+            </div>
+            <p id="progress-caption" class="text-[11px] font-semibold text-purple-800">1 of 3 planned activities logged this week</p>
+          </div>
+
+          <!-- Quick Action Hub (Week 5 Farm Lifecycle Integration) -->
+          <div class="grid grid-cols-3 gap-2">
+            <button onclick="setScreen('space')" class="p-2.5 bg-white border border-slate-200 rounded-xl flex flex-col items-center text-center hover:border-emerald-500 shadow-2xs transition-all active:scale-95">
+              <span class="text-base text-emerald-700">🌱</span>
+              <span class="text-[10px] font-bold text-slate-800 mt-1">+ Log Activity</span>
+            </button>
+            <button onclick="setScreen('space')" class="p-2.5 bg-white border border-slate-200 rounded-xl flex flex-col items-center text-center hover:border-blue-500 shadow-2xs transition-all active:scale-95">
+              <span class="text-base text-blue-600">📷</span>
+              <span class="text-[10px] font-bold text-slate-800 mt-1">Crop Photo</span>
+            </button>
+            <button onclick="setScreen('space')" class="p-2.5 bg-white border border-slate-200 rounded-xl flex flex-col items-center text-center hover:border-amber-500 shadow-2xs transition-all active:scale-95">
+              <span class="text-base text-amber-600">💰</span>
+              <span class="text-[10px] font-bold text-slate-800 mt-1">+ Expense</span>
+            </button>
+          </div>
+
+          <!-- Community & Schemes 2-Column Row -->
+          <div class="grid grid-cols-2 gap-2.5">
+            <div onclick="setScreen('village')" class="p-3 bg-white border border-slate-200 rounded-2xl shadow-2xs cursor-pointer hover:border-emerald-500 transition-all">
+              <span class="text-xl">📢</span>
+              <p class="text-xs font-bold text-slate-900 mt-1">My Village</p>
+              <p class="text-[10px] text-slate-500">3 verified notices</p>
+            </div>
+            <div class="p-3 bg-white border border-slate-200 rounded-2xl shadow-2xs">
+              <span class="text-xl">⭐</span>
+              <p class="text-xs font-bold text-slate-900 mt-1">Schemes (2)</p>
+              <p class="text-[10px] text-slate-500">PM-KISAN match</p>
+            </div>
+          </div>
+        </div>
+
+        <!-- Floating AI Mic FAB + Bottom Navigation Bar -->
+        <div class="relative bg-white border-t border-slate-200 px-4 py-2 flex items-center justify-around z-30">
+          <button class="flex flex-col items-center text-emerald-700 font-bold text-[10px]">
+            <span class="text-lg">🏠</span>
+            <span>Home</span>
+          </button>
+          <button onclick="setScreen('space')" class="flex flex-col items-center text-slate-500 hover:text-emerald-700 font-semibold text-[10px]">
+            <span class="text-lg">🌾</span>
+            <span>My Farm</span>
+          </button>
+          
+          <!-- Persistent Voice FAB -->
+          <button onclick="setScreen('ask')" class="-mt-8 w-13 h-13 rounded-full bg-emerald-700 text-white shadow-lg shadow-emerald-700/40 flex items-center justify-center border-4 border-white active:scale-95 transition-all">
+            <span class="text-xl">🎙️</span>
+          </button>
+
+          <button onclick="setScreen('village')" class="flex flex-col items-center text-slate-400 hover:text-emerald-700 text-[10px]">
+            <span class="text-lg">🏘️</span>
+            <span>Village</span>
+          </button>
+          <button class="flex flex-col items-center text-slate-400 hover:text-slate-600 text-[10px]">
+            <span class="text-lg">🏛️</span>
+            <span>Schemes</span>
+          </button>
+        </div>
+      </div>
+
+      <!-- ============================================ -->
+      <!-- SCREEN 5: ASK VILLAGENOVA CONVERSATIONAL AI -->
+      <!-- ============================================ -->
+      <div id="screen-ask" class="screen-view hidden flex-1 flex flex-col justify-between overflow-hidden bg-slate-50">
+        <!-- Top App Bar -->
+        <div class="bg-emerald-800 text-white px-4 py-3 flex items-center justify-between shadow-xs">
+          <div class="flex items-center gap-2">
+            <button onclick="setScreen('home')" class="text-white hover:text-emerald-200 text-sm font-bold">←</button>
+            <div>
+              <h3 class="text-xs font-extrabold flex items-center gap-1">✨ Ask VillageNova</h3>
+              <p class="text-[10px] text-emerald-200">Gemini Orchestrator • Vikarabad Context</p>
+            </div>
+          </div>
+          <button class="text-xs bg-emerald-700 hover:bg-emerald-600 px-2 py-1 rounded-lg">తెలుగు</button>
+        </div>
+
+        <!-- Chat Stream -->
+        <div id="chat-stream" class="flex-1 overflow-y-auto p-4 space-y-3 custom-scrollbar text-xs">
+          <!-- Bot Message -->
+          <div class="flex flex-col items-start gap-1 max-w-[85%]">
+            <span class="text-[10px] text-slate-400 font-semibold">VillageNova Companion</span>
+            <div class="p-3 bg-white border border-slate-200 rounded-2xl rounded-tl-sm shadow-2xs space-y-1.5">
+              <p class="text-slate-800">Namaskaram Ravi! 👋 I am your digital village companion. How can I guide your soybean field today?</p>
+            </div>
+          </div>
+
+          <!-- User Message -->
+          <div class="flex flex-col items-end gap-1 ml-auto max-w-[85%]">
+            <div class="p-3 bg-emerald-700 text-white rounded-2xl rounded-tr-sm shadow-2xs">
+              <p>What are today's mandi rates for soybean in Vikarabad?</p>
+            </div>
+          </div>
+
+          <!-- Bot Structured Guidance Card -->
+          <div class="flex flex-col items-start gap-1 max-w-[95%]">
+            <span class="text-[10px] text-emerald-800 font-bold flex items-center gap-1">
+              <span>🌾</span> Verified Krishi Feed
+            </span>
+            <div class="p-3.5 bg-white border border-emerald-200 rounded-2xl rounded-tl-sm shadow-2xs space-y-2">
+              <p class="font-bold text-slate-900 text-xs">Vikarabad APMC Mandi Rates:</p>
+              <div class="p-2 bg-emerald-50 rounded-xl border border-emerald-100 flex items-center justify-between">
+                <div>
+                  <p class="font-extrabold text-emerald-900 text-xs">₹4,850 / Quintal</p>
+                  <p class="text-[10px] text-emerald-700">+₹70 higher than yesterday</p>
+                </div>
+                <span class="text-xs bg-emerald-600 text-white px-2 py-0.5 rounded-full font-bold">Stable</span>
+              </div>
+              <p class="text-[11px] text-slate-600 leading-snug">
+                💡 <strong>Why:</strong> Steady arrivals from Marpalle and Kotepally. Local oil mill demand is elevated.
+              </p>
+              <div class="pt-1 border-t border-slate-100 flex items-center justify-between text-[10px] text-slate-400">
+                <span>Source: AGMARKNET Telangana</span>
+                <span>Updated 2h ago</span>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Input Bar with Voice & Media -->
+        <div class="p-3 bg-white border-t border-slate-200 flex items-center gap-2">
+          <button class="p-2 text-slate-500 hover:text-emerald-700">📷</button>
+          <button class="p-2 text-slate-500 hover:text-emerald-700">🎙️</button>
+          <input type="text" id="chat-input" placeholder="Ask in Telugu or English..." class="flex-1 bg-slate-100 text-xs rounded-xl px-3 py-2 outline-none focus:ring-1 focus:ring-emerald-600">
+          <button onclick="sendChatMessage()" class="p-2 bg-emerald-700 text-white rounded-xl shadow-xs hover:bg-emerald-800">
+            ➤
+          </button>
+        </div>
+      </div>
+
+      <!-- ============================================ -->
+      <!-- SCREEN 6: MY SPACE (FARM & CROP LIFECYCLE)   -->
+      <!-- ============================================ -->
+      <div id="screen-space" class="screen-view hidden flex-1 flex flex-col justify-between overflow-hidden bg-slate-50">
+        <!-- Top App Bar -->
+        <div class="bg-emerald-800 text-white px-4 py-3 flex items-center justify-between shadow-xs z-20">
+          <div class="flex items-center gap-2">
+            <button onclick="setScreen('home')" class="text-white hover:text-emerald-200 text-sm font-bold">←</button>
+            <div>
+              <h3 class="text-xs font-extrabold flex items-center gap-1">🌱 My Farm Space</h3>
+              <p class="text-[10px] text-emerald-200">Ravi's Main Farm • 2.5 Acres</p>
+            </div>
+          </div>
+          <button onclick="refreshFarmData()" class="text-xs bg-emerald-700 hover:bg-emerald-600 px-2.5 py-1 rounded-lg flex items-center gap-1 font-semibold">
+            <span>🔄</span> Sync
+          </button>
+        </div>
+
+        <!-- Scrollable Space Content -->
+        <div class="flex-1 overflow-y-auto p-4 space-y-3 custom-scrollbar text-xs">
+          <!-- Farm Overview Card -->
+          <div class="p-3.5 bg-white border border-slate-200 rounded-2xl shadow-2xs space-y-2.5">
+            <div class="flex items-center justify-between">
+              <div>
+                <h4 class="font-extrabold text-sm text-slate-900">Ravi's Main Farm</h4>
+                <p class="text-[11px] text-slate-500 font-medium">2.5 Acres • Black Soil (నల్ల రేగడి)</p>
+              </div>
+              <span class="px-2 py-0.5 rounded-full bg-emerald-100 text-emerald-800 text-[10px] font-bold border border-emerald-200">
+                💧 Borewell
+              </span>
+            </div>
+            <div class="grid grid-cols-3 gap-2 pt-2 border-t border-slate-100 text-center">
+              <div>
+                <p class="text-[10px] text-slate-400">Total Land</p>
+                <p class="font-extrabold text-slate-800 text-xs">2.5 ac</p>
+              </div>
+              <div>
+                <p class="text-[10px] text-slate-400">Total Spent</p>
+                <p id="space-total-spent" class="font-extrabold text-amber-700 text-xs">₹4,650</p>
+              </div>
+              <div>
+                <p class="text-[10px] text-slate-400">Activities</p>
+                <p id="space-total-activities" class="font-extrabold text-emerald-700 text-xs">2 Logged</p>
+              </div>
+            </div>
+          </div>
+
+          <!-- Advisory Card -->
+          <div class="p-3 bg-emerald-50/90 border border-emerald-200 rounded-2xl text-[11px] flex items-start gap-2.5">
+            <span class="text-base">🌦️</span>
+            <div>
+              <p class="font-bold text-emerald-950 uppercase tracking-wide text-[10px]">Farm & Weather Advisory</p>
+              <p class="text-emerald-900 mt-0.5">Rain expected today at 6:00 PM (14mm). Hold evening spray operations.</p>
+            </div>
+          </div>
+
+          <!-- Active Crop Status Card -->
+          <div class="p-3.5 bg-white border border-slate-200 rounded-2xl shadow-2xs space-y-2">
+            <div class="flex items-center justify-between">
+              <div class="flex items-center gap-2">
+                <span class="text-xl">🌿</span>
+                <div>
+                  <h4 class="font-bold text-slate-900 text-xs">Soybean (JS-335)</h4>
+                  <p class="text-[10px] text-slate-500">Sown on June 15, 2026</p>
+                </div>
+              </div>
+              <span class="px-2 py-0.5 rounded-lg bg-blue-100 text-blue-800 text-[11px] font-extrabold border border-blue-200">
+                Day 42
+              </span>
+            </div>
+            <div class="space-y-1">
+              <div class="flex justify-between text-[11px]">
+                <span class="font-bold text-emerald-800">Vegetative Stage</span>
+                <span class="text-slate-500 font-semibold">65% Completed</span>
+              </div>
+              <div class="w-full h-2 bg-slate-100 rounded-full overflow-hidden">
+                <div class="w-[65%] h-full bg-emerald-600 rounded-full"></div>
+              </div>
+            </div>
+            <p class="text-[10px] text-slate-400 italic">Goal: Max Yield (High Protein & Pod Vigor)</p>
+          </div>
+
+          <!-- Visual Agronomic Stepper -->
+          <div class="p-3.5 bg-white border border-slate-200 rounded-2xl shadow-2xs space-y-3">
+            <div class="flex items-center justify-between">
+              <span class="text-[10px] font-extrabold text-slate-400 uppercase tracking-wider">Agronomic Lifecycle Timeline</span>
+              <span class="text-[10px] font-bold text-emerald-700 bg-emerald-50 px-2 py-0.5 rounded">6 Stages</span>
+            </div>
+
+            <!-- Stepper List -->
+            <div class="space-y-3 pl-1">
+              <!-- Stage 1 -->
+              <div class="flex items-start gap-2.5">
+                <div class="flex flex-col items-center">
+                  <div class="w-5 h-5 rounded-full bg-emerald-600 text-white flex items-center justify-center text-[10px] font-bold">✓</div>
+                  <div class="w-0.5 h-6 bg-emerald-600"></div>
+                </div>
+                <div class="flex-1 -mt-0.5">
+                  <div class="flex justify-between items-center">
+                    <span class="font-bold text-slate-800 text-xs">Sowing & Seeding</span>
+                    <span class="text-[10px] text-slate-400 font-medium">Day 1-5</span>
+                  </div>
+                  <p class="text-[10px] text-slate-400">Completed with certified JS-335 seeds</p>
+                </div>
+              </div>
+
+              <!-- Stage 2 -->
+              <div class="flex items-start gap-2.5">
+                <div class="flex flex-col items-center">
+                  <div class="w-5 h-5 rounded-full bg-emerald-600 text-white flex items-center justify-center text-[10px] font-bold">✓</div>
+                  <div class="w-0.5 h-6 bg-emerald-600"></div>
+                </div>
+                <div class="flex-1 -mt-0.5">
+                  <div class="flex justify-between items-center">
+                    <span class="font-bold text-slate-800 text-xs">Germination & Emergence</span>
+                    <span class="text-[10px] text-slate-400 font-medium">Day 6-12</span>
+                  </div>
+                  <p class="text-[10px] text-slate-400">92% emergence recorded</p>
+                </div>
+              </div>
+
+              <!-- Stage 3 (ACTIVE) -->
+              <div class="flex items-start gap-2.5">
+                <div class="flex flex-col items-center">
+                  <div class="w-5 h-5 rounded-full bg-white border-2 border-emerald-600 flex items-center justify-center">
+                    <div class="w-2 h-2 rounded-full bg-emerald-600 animate-pulse"></div>
+                  </div>
+                  <div class="w-0.5 h-6 bg-slate-200"></div>
+                </div>
+                <div class="flex-1 -mt-0.5">
+                  <div class="flex justify-between items-center">
+                    <span class="font-extrabold text-emerald-800 text-xs">Vegetative & Branching</span>
+                    <span class="text-[10px] bg-emerald-100 text-emerald-800 px-1.5 py-0.5 rounded font-bold">Current • Day 42</span>
+                  </div>
+                  <p class="text-[10px] text-emerald-700 font-medium mt-0.5">Canopy closure in progress • Weed scouting recommended</p>
+                </div>
+              </div>
+
+              <!-- Stage 4 -->
+              <div class="flex items-start gap-2.5">
+                <div class="flex flex-col items-center">
+                  <div class="w-5 h-5 rounded-full bg-slate-100 border border-slate-300"></div>
+                  <div class="w-0.5 h-6 bg-slate-200"></div>
+                </div>
+                <div class="flex-1 -mt-0.5">
+                  <div class="flex justify-between items-center">
+                    <span class="font-semibold text-slate-500 text-xs">Flowering & Bloom</span>
+                    <span class="text-[10px] text-slate-400 font-medium">Day 56-75</span>
+                  </div>
+                </div>
+              </div>
+
+              <!-- Stage 5 -->
+              <div class="flex items-start gap-2.5">
+                <div class="flex flex-col items-center">
+                  <div class="w-5 h-5 rounded-full bg-slate-100 border border-slate-300"></div>
+                  <div class="w-0.5 h-6 bg-slate-200"></div>
+                </div>
+                <div class="flex-1 -mt-0.5">
+                  <div class="flex justify-between items-center">
+                    <span class="font-semibold text-slate-500 text-xs">Pod Formation</span>
+                    <span class="text-[10px] text-slate-400 font-medium">Day 76-95</span>
+                  </div>
+                </div>
+              </div>
+
+              <!-- Stage 6 -->
+              <div class="flex items-start gap-2.5">
+                <div class="flex flex-col items-center">
+                  <div class="w-5 h-5 rounded-full bg-slate-100 border border-slate-300"></div>
+                </div>
+                <div class="flex-1 -mt-0.5">
+                  <div class="flex justify-between items-center">
+                    <span class="font-semibold text-slate-500 text-xs">Harvest & Threshing</span>
+                    <span class="text-[10px] text-slate-400 font-medium">Day 96-115</span>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <!-- Quick Action Buttons -->
+          <div class="grid grid-cols-3 gap-2">
+            <button onclick="promptLogActivity()" class="p-2.5 bg-white border border-slate-200 rounded-xl flex flex-col items-center text-center hover:border-emerald-500 shadow-2xs active:scale-95 transition-all">
+              <span class="text-base text-emerald-700">🌱</span>
+              <span class="text-[10px] font-bold text-slate-800 mt-1">+ Activity</span>
+            </button>
+            <button onclick="promptAddExpense()" class="p-2.5 bg-white border border-slate-200 rounded-xl flex flex-col items-center text-center hover:border-emerald-500 shadow-2xs active:scale-95 transition-all">
+              <span class="text-base text-amber-600">💰</span>
+              <span class="text-[10px] font-bold text-slate-800 mt-1">+ Expense</span>
+            </button>
+            <button onclick="promptFieldPhoto()" class="p-2.5 bg-white border border-slate-200 rounded-xl flex flex-col items-center text-center hover:border-emerald-500 shadow-2xs active:scale-95 transition-all">
+              <span class="text-base text-blue-600">📷</span>
+              <span class="text-[10px] font-bold text-slate-800 mt-1">Field Photo</span>
+            </button>
+          </div>
+
+          <!-- Recent Activity Log List -->
+          <div class="p-3.5 bg-white border border-slate-200 rounded-2xl shadow-2xs space-y-2">
+            <div class="flex items-center justify-between">
+              <span class="text-[10px] font-extrabold text-slate-400 uppercase tracking-wider">Recent Farm Activities</span>
+              <span id="activity-badge-count" class="text-[10px] text-emerald-700 font-bold">2 items</span>
+            </div>
+            <div id="space-activities-feed" class="space-y-2">
+              <div class="p-2.5 bg-slate-50 rounded-xl border border-slate-100 flex items-center justify-between">
+                <div class="flex items-center gap-2">
+                  <span class="p-1.5 bg-white rounded-lg border border-slate-200 text-xs">💧</span>
+                  <div>
+                    <p class="font-bold text-slate-800 text-xs">Irrigation</p>
+                    <p class="text-[10px] text-slate-500">Borewell channel irrigation before dry interval</p>
+                  </div>
+                </div>
+                <span class="text-[10px] text-slate-400 font-medium">2d ago</span>
+              </div>
+              <div class="p-2.5 bg-slate-50 rounded-xl border border-slate-100 flex items-center justify-between">
+                <div class="flex items-center gap-2">
+                  <span class="p-1.5 bg-white rounded-lg border border-slate-200 text-xs">🧪</span>
+                  <div>
+                    <p class="font-bold text-slate-800 text-xs">Fertilizer Application</p>
+                    <p class="text-[10px] text-slate-500">Applied DAP (18-46-0) split dose</p>
+                  </div>
+                </div>
+                <div class="text-right">
+                  <p class="font-bold text-amber-700 text-xs">₹1,450</p>
+                  <span class="text-[10px] text-slate-400">8d ago</span>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <!-- Financial Expenses Breakdown -->
+          <div class="p-3.5 bg-amber-50/70 border border-amber-200 rounded-2xl shadow-2xs space-y-2">
+            <div class="flex items-center justify-between">
+              <span class="text-[10px] font-extrabold text-amber-900 uppercase tracking-wider">Season Expenses Breakdown</span>
+              <span id="space-expenses-total-badge" class="text-xs font-extrabold text-amber-900">₹4,650</span>
+            </div>
+            <div id="space-expenses-list" class="space-y-1.5 text-[11px]">
+              <div class="flex justify-between items-center text-amber-950 font-medium">
+                <span>🌱 Certified Seeds (JS-335, 30kg)</span>
+                <span class="font-bold">₹3,200</span>
+              </div>
+              <div class="flex justify-between items-center text-amber-950 font-medium">
+                <span>🧪 DAP Fertilizer (1 bag)</span>
+                <span class="font-bold">₹1,450</span>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Space Screen Bottom Navigation Bar -->
+        <div class="relative bg-white border-t border-slate-200 px-4 py-2 flex items-center justify-around z-30">
+          <button onclick="setScreen('home')" class="flex flex-col items-center text-slate-400 hover:text-slate-600 text-[10px]">
+            <span class="text-lg">🏠</span>
+            <span>Home</span>
+          </button>
+          <button class="flex flex-col items-center text-emerald-700 font-bold text-[10px]">
+            <span class="text-lg">🌾</span>
+            <span>My Farm</span>
+          </button>
+          
+          <!-- Persistent Voice FAB -->
+          <button onclick="setScreen('ask')" class="-mt-8 w-13 h-13 rounded-full bg-emerald-700 text-white shadow-lg shadow-emerald-700/40 flex items-center justify-center border-4 border-white active:scale-95 transition-all">
+            <span class="text-xl">🎙️</span>
+          </button>
+
+          <button onclick="setScreen('village')" class="flex flex-col items-center text-slate-400 hover:text-emerald-700 text-[10px]">
+            <span class="text-lg">🏘️</span>
+            <span>Village</span>
+          </button>
+          <button class="flex flex-col items-center text-slate-400 hover:text-slate-600 text-[10px]">
+            <span class="text-lg">🏛️</span>
+            <span>Schemes</span>
+          </button>
+        </div>
+      </div>
+
+      <!-- ============================================ -->
+      <!-- SCREEN 7: MY VILLAGE (COMMUNITY & BULLETINS) -->
+      <!-- ============================================ -->
+      <div id="screen-village" class="screen-view hidden flex-1 flex flex-col justify-between overflow-hidden bg-slate-50">
+        <!-- Top App Bar -->
+        <div class="bg-emerald-800 text-white px-4 py-3 flex items-center justify-between shadow-xs z-20">
+          <div class="flex items-center gap-2">
+            <button onclick="setScreen('home')" class="text-white hover:text-emerald-200 text-sm font-bold">←</button>
+            <div>
+              <h3 class="text-xs font-extrabold flex items-center gap-1">🏘️ My Village • గ్రామ వేదిక</h3>
+              <p class="text-[10px] text-emerald-200">Ananthagiri • Vikarabad District</p>
+            </div>
+          </div>
+          <button onclick="refreshVillageFeed()" class="text-xs bg-emerald-700 hover:bg-emerald-600 px-2.5 py-1 rounded-lg flex items-center gap-1 font-semibold">
+            <span>🔄</span> Sync
+          </button>
+        </div>
+
+        <!-- Scrollable Village Content -->
+        <div class="flex-1 overflow-y-auto p-4 space-y-3.5 custom-scrollbar text-xs">
+          <!-- Village Info Card -->
+          <div class="p-3.5 bg-white border border-slate-200 rounded-2xl shadow-2xs space-y-2">
+            <div class="flex items-center justify-between">
+              <div class="flex items-center gap-2.5">
+                <div class="w-9 h-9 rounded-xl bg-emerald-100 flex items-center justify-center text-lg">
+                  🏛️
+                </div>
+                <div>
+                  <h4 class="font-extrabold text-sm text-slate-900">Ananthagiri Gram Panchayat</h4>
+                  <p class="text-[11px] text-slate-500 font-medium">Vikarabad Mandal • 501101</p>
+                </div>
+              </div>
+              <span id="village-notices-badge" class="px-2 py-0.5 rounded-full bg-emerald-100 text-emerald-800 text-[10px] font-bold border border-emerald-200">
+                ✓ 3 Verified
+              </span>
+            </div>
+          </div>
+
+          <!-- Urgent Emergency Alert Banner -->
+          <div class="p-3.5 bg-rose-50 border border-rose-200 rounded-2xl text-[11px] flex items-start gap-2.5 shadow-2xs">
+            <span class="text-xl">🚨</span>
+            <div class="flex-1">
+              <div class="flex items-center justify-between">
+                <p class="font-extrabold text-rose-950 uppercase tracking-wide text-[10px]">Urgent Panchayat Broadcast</p>
+                <span class="text-[9px] bg-rose-200 text-rose-800 font-bold px-1.5 py-0.2 rounded">TSSPDCL</span>
+              </div>
+              <p class="font-bold text-rose-900 mt-0.5 text-xs">⚡ 3-Phase Agricultural Power Schedule Changed</p>
+              <p class="text-rose-800 mt-1 leading-snug">
+                Power for borewells will run from 4:00 AM to 11:00 AM & 7:00 PM to 10:00 PM starting Tuesday due to substation grid repair.
+              </p>
+            </div>
+          </div>
+
+          <!-- Weather Intelligence Card -->
+          <div class="p-3.5 bg-sky-50/80 border border-sky-200 rounded-2xl shadow-2xs space-y-2.5">
+            <div class="flex items-center justify-between">
+              <div class="flex items-center gap-2">
+                <span class="text-2xl">⛈️</span>
+                <div>
+                  <div class="flex items-baseline gap-1.5">
+                    <span class="text-xl font-extrabold text-sky-950">29.4°C</span>
+                    <span class="text-[11px] font-semibold text-sky-700">Scattered Rain</span>
+                  </div>
+                  <p class="text-[10px] text-sky-600">Humidity 82% • Wind 14.5 km/h</p>
+                </div>
+              </div>
+              <div class="text-right bg-white/80 px-2.5 py-1.5 rounded-xl border border-sky-100">
+                <p class="text-xs font-extrabold text-sky-900">85% Rain</p>
+                <p class="text-[10px] text-sky-600 font-medium">14 mm at 6 PM</p>
+              </div>
+            </div>
+
+            <div class="p-2.5 bg-white rounded-xl border border-sky-100 flex items-start gap-2 text-[11px]">
+              <span class="text-sm">💡</span>
+              <p class="text-sky-900 leading-snug">
+                <strong>Agronomic Advisory:</strong> Heavy rain (14mm) expected around 6:00 PM. Conclude pesticide spray and field hoeing by 4:30 PM.
+              </p>
+            </div>
+
+            <!-- Hourly Weather Strip -->
+            <div class="flex items-center gap-1.5 overflow-x-auto pb-1">
+              <div class="px-2 py-1.5 bg-white rounded-lg border border-sky-100 text-center min-w-[56px]">
+                <p class="text-[9px] text-slate-400 font-semibold">2:00 PM</p>
+                <p class="text-xs font-bold text-slate-800">31°</p>
+                <p class="text-[9px] text-sky-600 font-bold">20% 💧</p>
+              </div>
+              <div class="px-2 py-1.5 bg-white rounded-lg border border-sky-100 text-center min-w-[56px]">
+                <p class="text-[9px] text-slate-400 font-semibold">4:00 PM</p>
+                <p class="text-xs font-bold text-slate-800">29°</p>
+                <p class="text-[9px] text-sky-600 font-bold">45% 💧</p>
+              </div>
+              <div class="px-2 py-1.5 bg-sky-200/80 rounded-lg border border-sky-300 text-center min-w-[56px]">
+                <p class="text-[9px] text-sky-900 font-bold">6:00 PM</p>
+                <p class="text-xs font-extrabold text-sky-950">26°</p>
+                <p class="text-[9px] text-sky-800 font-extrabold">90% ⛈️</p>
+              </div>
+              <div class="px-2 py-1.5 bg-white rounded-lg border border-sky-100 text-center min-w-[56px]">
+                <p class="text-[9px] text-slate-400 font-semibold">8:00 PM</p>
+                <p class="text-xs font-bold text-slate-800">24°</p>
+                <p class="text-[9px] text-sky-600 font-bold">70% 💧</p>
+              </div>
+              <div class="px-2 py-1.5 bg-white rounded-lg border border-sky-100 text-center min-w-[56px]">
+                <p class="text-[9px] text-slate-400 font-semibold">10:00 PM</p>
+                <p class="text-xs font-bold text-slate-800">24°</p>
+                <p class="text-[9px] text-sky-600 font-bold">30% 💧</p>
+              </div>
+            </div>
+          </div>
+
+          <!-- APMC Mandi Market Prices Ticker -->
+          <div class="space-y-2">
+            <div class="flex items-center justify-between">
+              <span class="text-[10px] font-extrabold text-slate-400 uppercase tracking-wider">APMC Mandi Rates (వికారాబాద్)</span>
+              <span class="text-[10px] text-emerald-700 font-bold">Live Agmarknet</span>
+            </div>
+            <div class="grid grid-cols-2 gap-2">
+              <!-- Soybean -->
+              <div class="p-2.5 bg-white border border-slate-200 rounded-xl shadow-2xs space-y-1">
+                <div class="flex justify-between items-start">
+                  <span class="font-extrabold text-slate-800 text-xs">Soybean</span>
+                  <span class="text-[10px] font-bold text-emerald-600 bg-emerald-50 px-1 rounded">+₹70 ▲</span>
+                </div>
+                <p class="text-[10px] text-slate-400">Vikarabad APMC</p>
+                <p class="text-sm font-extrabold text-slate-900">₹4,850 <span class="text-[10px] font-normal text-slate-500">/Q</span></p>
+              </div>
+
+              <!-- Cotton -->
+              <div class="p-2.5 bg-white border border-slate-200 rounded-xl shadow-2xs space-y-1">
+                <div class="flex justify-between items-start">
+                  <span class="font-extrabold text-slate-800 text-xs">Cotton</span>
+                  <span class="text-[10px] font-bold text-emerald-600 bg-emerald-50 px-1 rounded">+₹120 ▲</span>
+                </div>
+                <p class="text-[10px] text-slate-400">Tandur APMC</p>
+                <p class="text-sm font-extrabold text-slate-900">₹7,200 <span class="text-[10px] font-normal text-slate-500">/Q</span></p>
+              </div>
+
+              <!-- Red Gram / Tur -->
+              <div class="p-2.5 bg-white border border-slate-200 rounded-xl shadow-2xs space-y-1">
+                <div class="flex justify-between items-start">
+                  <span class="font-extrabold text-slate-800 text-xs">Red Gram (Tur)</span>
+                  <span class="text-[10px] font-bold text-rose-600 bg-rose-50 px-1 rounded">-₹40 ▼</span>
+                </div>
+                <p class="text-[10px] text-slate-400">Vikarabad APMC</p>
+                <p class="text-sm font-extrabold text-slate-900">₹6,900 <span class="text-[10px] font-normal text-slate-500">/Q</span></p>
+              </div>
+
+              <!-- Maize -->
+              <div class="p-2.5 bg-white border border-slate-200 rounded-xl shadow-2xs space-y-1">
+                <div class="flex justify-between items-start">
+                  <span class="font-extrabold text-slate-800 text-xs">Maize</span>
+                  <span class="text-[10px] font-semibold text-slate-500 bg-slate-50 px-1 rounded">0.0 ●</span>
+                </div>
+                <p class="text-[10px] text-slate-400">Sadasivpet APMC</p>
+                <p class="text-sm font-extrabold text-slate-900">₹2,150 <span class="text-[10px] font-normal text-slate-500">/Q</span></p>
+              </div>
+            </div>
+          </div>
+
+          <!-- Category Filter Bar -->
+          <div class="flex items-center gap-1.5 overflow-x-auto pb-1 text-[11px]">
+            <button onclick="filterBulletins('all')" id="vcat-all" class="px-2.5 py-1 rounded-full bg-emerald-100 text-emerald-800 font-bold border border-emerald-300">All</button>
+            <button onclick="filterBulletins('panchayat')" id="vcat-panchayat" class="px-2.5 py-1 rounded-full bg-white text-slate-600 font-semibold border border-slate-200">🏛️ Panchayat</button>
+            <button onclick="filterBulletins('agriculture')" id="vcat-agriculture" class="px-2.5 py-1 rounded-full bg-white text-slate-600 font-semibold border border-slate-200">🌾 Agriculture</button>
+            <button onclick="filterBulletins('health')" id="vcat-health" class="px-2.5 py-1 rounded-full bg-white text-slate-600 font-semibold border border-slate-200">🏥 Health</button>
+          </div>
+
+          <!-- Community Bulletin Board Feed -->
+          <div class="space-y-2.5" id="village-bulletins-feed">
+            <!-- Notice 1 -->
+            <div class="bulletin-card p-3 bg-white border border-slate-200 rounded-2xl shadow-2xs space-y-2" data-category="panchayat">
+              <div class="flex items-center justify-between">
+                <span class="px-2 py-0.5 rounded bg-blue-100 text-blue-800 text-[9px] font-extrabold uppercase">PANCHAYAT</span>
+                <span class="text-[10px] font-bold text-emerald-700 flex items-center gap-1">✓ Verified</span>
+              </div>
+              <h4 class="font-extrabold text-xs text-slate-900">⚡ 3-Phase Agricultural Power Schedule Changed</h4>
+              <p class="text-[11px] text-slate-600 leading-snug">
+                Due to grid maintenance, 3-phase power for borewells will run from 4:00 AM to 11:00 AM and 7:00 PM to 10:00 PM starting Tuesday.
+              </p>
+              <div class="pt-2 border-t border-slate-100 flex items-center justify-between text-[10px] text-slate-400">
+                <span class="font-semibold text-slate-700">TSSPDCL & Gram Panchayat</span>
+                <span>3h ago</span>
+              </div>
+            </div>
+
+            <!-- Notice 2 -->
+            <div class="bulletin-card p-3 bg-white border border-slate-200 rounded-2xl shadow-2xs space-y-2" data-category="agriculture">
+              <div class="flex items-center justify-between">
+                <span class="px-2 py-0.5 rounded bg-emerald-100 text-emerald-800 text-[9px] font-extrabold uppercase">AGRICULTURE</span>
+                <span class="text-[10px] font-bold text-emerald-700 flex items-center gap-1">✓ Verified</span>
+              </div>
+              <h4 class="font-extrabold text-xs text-slate-900">🌾 Subsidized Gypsum & Bio-fertilizer Distribution</h4>
+              <p class="text-[11px] text-slate-600 leading-snug">
+                Rythu Bharosa Kendra (RBK) Ananthagiri has received 200 bags of agricultural gypsum and Trichoderma. Bring Pattadar Passbook before Friday 5 PM.
+              </p>
+              <div class="pt-2 border-t border-slate-100 flex items-center justify-between text-[10px] text-slate-400">
+                <span class="font-semibold text-slate-700">AEO Department of Agriculture</span>
+                <span>8h ago</span>
+              </div>
+            </div>
+
+            <!-- Notice 3 -->
+            <div class="bulletin-card p-3 bg-white border border-slate-200 rounded-2xl shadow-2xs space-y-2" data-category="health">
+              <div class="flex items-center justify-between">
+                <span class="px-2 py-0.5 rounded bg-teal-100 text-teal-800 text-[9px] font-extrabold uppercase">HEALTH</span>
+                <span class="text-[10px] font-bold text-emerald-700 flex items-center gap-1">✓ Verified</span>
+              </div>
+              <h4 class="font-extrabold text-xs text-slate-900">🏥 Free Monsoon Health & Eye Checkup Camp</h4>
+              <p class="text-[11px] text-slate-600 leading-snug">
+                Primary Health Centre (PHC) Ananthagiri is organizing a free health screening camp at Zilla Parishad High School ground this Saturday 9 AM.
+              </p>
+              <div class="pt-2 border-t border-slate-100 flex items-center justify-between text-[10px] text-slate-400">
+                <span class="font-semibold text-slate-700">Dr. Sunitha Reddy (PHC)</span>
+                <span>1d ago</span>
+              </div>
+            </div>
+          </div>
+
+          <!-- Bottom Action: Post Notice -->
+          <button onclick="promptPostNotice()" class="w-full py-2.5 bg-emerald-700 hover:bg-emerald-800 text-white rounded-xl text-xs font-bold flex items-center justify-center gap-1.5 shadow-sm active:scale-98 transition-all">
+            <span>📢</span> + Post Community Notice
+          </button>
+        </div>
+
+        <!-- Village Screen Bottom Navigation Bar -->
+        <div class="relative bg-white border-t border-slate-200 px-4 py-2 flex items-center justify-around z-30">
+          <button onclick="setScreen('home')" class="flex flex-col items-center text-slate-400 hover:text-slate-600 text-[10px]">
+            <span class="text-lg">🏠</span>
+            <span>Home</span>
+          </button>
+          <button onclick="setScreen('space')" class="flex flex-col items-center text-slate-400 hover:text-slate-600 text-[10px]">
+            <span class="text-lg">🌾</span>
+            <span>My Farm</span>
+          </button>
+          
+          <!-- Persistent Voice FAB -->
+          <button onclick="setScreen('ask')" class="-mt-8 w-13 h-13 rounded-full bg-emerald-700 text-white shadow-lg shadow-emerald-700/40 flex items-center justify-center border-4 border-white active:scale-95 transition-all">
+            <span class="text-xl">🎙️</span>
+          </button>
+
+          <button class="flex flex-col items-center text-emerald-700 font-bold text-[10px]">
+            <span class="text-lg">🏘️</span>
+            <span>Village</span>
+          </button>
+          <button class="flex flex-col items-center text-slate-400 hover:text-slate-600 text-[10px]">
+            <span class="text-lg">🏛️</span>
+            <span>Schemes</span>
+          </button>
+        </div>
+      </div>
+
+    </div>
+  </div>
+
+  <script>
+    // State Router for Mobile Screens
+    function setScreen(screenName) {
+      document.querySelectorAll('.screen-view').forEach(el => el.classList.add('hidden'));
+      const active = document.getElementById('screen-' + screenName);
+      if (active) active.classList.remove('hidden');
+
+      // Update pills
+      ['welcome', 'auth', 'onboarding', 'home', 'ask', 'space', 'village'].forEach(name => {
+        const pill = document.getElementById('pill-' + name);
+        if (pill) {
+          if (name === screenName) {
+            pill.className = 'px-2.5 py-1 rounded-lg text-xs font-semibold bg-emerald-600 text-white transition-all shadow-sm';
+          } else {
+            pill.className = 'px-2.5 py-1 rounded-lg text-xs font-semibold bg-slate-800 text-slate-300 hover:bg-slate-700 transition-all';
+          }
+        }
+      });
+    }
+
+    // Interactive Village Feed Functions (Week 6 Engine)
+    let villageNoticesCount = 3;
+
+    function refreshVillageFeed() {
+      const syncBtn = event?.currentTarget;
+      if (syncBtn) {
+        syncBtn.innerHTML = '<span>⏳</span> Syncing...';
+        setTimeout(() => {
+          syncBtn.innerHTML = '<span>✓</span> Synced';
+          setTimeout(() => syncBtn.innerHTML = '<span>🔄</span> Sync', 1200);
+        }, 500);
+      }
+    }
+
+    function filterBulletins(category) {
+      ['all', 'panchayat', 'agriculture', 'health'].forEach(cat => {
+        const btn = document.getElementById('vcat-' + cat);
+        if (btn) {
+          if (cat === category) {
+            btn.className = 'px-2.5 py-1 rounded-full bg-emerald-100 text-emerald-800 font-bold border border-emerald-300';
+          } else {
+            btn.className = 'px-2.5 py-1 rounded-full bg-white text-slate-600 font-semibold border border-slate-200';
+          }
+        }
+      });
+
+      const cards = document.querySelectorAll('.bulletin-card');
+      cards.forEach(card => {
+        if (category === 'all' || card.getAttribute('data-category') === category) {
+          card.classList.remove('hidden');
+        } else {
+          card.classList.add('hidden');
+        }
+      });
+    }
+
+    function promptPostNotice() {
+      const category = prompt('Notice Category:\n(panchayat, agriculture, health, community)', 'agriculture');
+      if (!category) return;
+      const title = prompt('Notice Headline / Title:', 'Free Drip Irrigation Pipe Subsidy');
+      if (!title) return;
+      const content = prompt('Notice Details & Instructions:', 'Application forms available at Gram Panchayat hall until Friday.');
+      if (!content) return;
+      const isUrgent = confirm('Is this an URGENT emergency broadcast?');
+
+      villageNoticesCount++;
+      document.getElementById('village-notices-badge').textContent = `✓ ${villageNoticesCount} Verified`;
+
+      const feed = document.getElementById('village-bulletins-feed');
+      const newCard = document.createElement('div');
+      newCard.className = `bulletin-card p-3 bg-white border ${isUrgent ? 'border-rose-300 ring-1 ring-rose-300' : 'border-slate-200'} rounded-2xl shadow-2xs space-y-2 animate-pulse`;
+      newCard.setAttribute('data-category', category);
+      newCard.innerHTML = `
+        <div class="flex items-center justify-between">
+          <span class="px-2 py-0.5 rounded ${isUrgent ? 'bg-rose-100 text-rose-800' : 'bg-emerald-100 text-emerald-800'} text-[9px] font-extrabold uppercase">${category.toUpperCase()}</span>
+          <span class="text-[10px] font-bold text-emerald-700 flex items-center gap-1">✓ Verified Resident</span>
+        </div>
+        <h4 class="font-extrabold text-xs text-slate-900">${isUrgent ? '🚨 ' : ''}${title}</h4>
+        <p class="text-[11px] text-slate-600 leading-snug">${content}</p>
+        <div class="pt-2 border-t border-slate-100 flex items-center justify-between text-[10px] text-slate-400">
+          <span class="font-semibold text-slate-700">Ravi (Resident Contributor)</span>
+          <span class="text-emerald-700 font-semibold">Just now</span>
+        </div>
+      `;
+      feed.insertBefore(newCard, feed.firstChild);
+      setTimeout(() => newCard.classList.remove('animate-pulse'), 1500);
+    }
+
+    // Interactive Farm Space Functions (Week 5 Engine)
+    let farmTotalSpent = 4650;
+    let farmActivitiesCount = 2;
+
+    function refreshFarmData() {
+      const syncBtn = event?.currentTarget;
+      if (syncBtn) {
+        syncBtn.innerHTML = '<span>⏳</span> Syncing...';
+        setTimeout(() => {
+          syncBtn.innerHTML = '<span>✓</span> Synced';
+          setTimeout(() => syncBtn.innerHTML = '<span>🔄</span> Sync', 1200);
+        }, 500);
+      }
+    }
+
+    function promptLogActivity() {
+      const type = prompt('Select Activity Type:\n(Irrigation, Fertilizer, Pesticide, Weeding, Scouting, Harvest)', 'Weeding');
+      if (!type) return;
+      const desc = prompt('Enter Activity Note / Description:', 'Hand weeding along rows 4-12') || (type + ' performed');
+      const costStr = prompt('Cost Incurred (₹, optional):', '350');
+      const cost = parseFloat(costStr) || 0;
+
+      farmActivitiesCount++;
+      document.getElementById('space-total-activities').textContent = farmActivitiesCount + ' Logged';
+      document.getElementById('activity-badge-count').textContent = farmActivitiesCount + ' items';
+
+      if (cost > 0) {
+        farmTotalSpent += cost;
+        document.getElementById('space-total-spent').textContent = '₹' + farmTotalSpent.toLocaleString('en-IN');
+        document.getElementById('space-expenses-total-badge').textContent = '₹' + farmTotalSpent.toLocaleString('en-IN');
+      }
+
+      const feed = document.getElementById('space-activities-feed');
+      const newCard = document.createElement('div');
+      newCard.className = 'p-2.5 bg-emerald-50/70 rounded-xl border border-emerald-200 flex items-center justify-between animate-pulse';
+      newCard.innerHTML = `
+        <div class="flex items-center gap-2">
+          <span class="p-1.5 bg-white rounded-lg border border-emerald-300 text-xs">🌱</span>
+          <div>
+            <p class="font-bold text-slate-900 text-xs">${type}</p>
+            <p class="text-[10px] text-slate-600">${desc}</p>
+          </div>
+        </div>
+        <div class="text-right">
+          ${cost > 0 ? `<p class="font-bold text-amber-700 text-xs">₹${cost}</p>` : ''}
+          <span class="text-[10px] text-emerald-700 font-semibold">Just now</span>
+        </div>
+      `;
+      feed.insertBefore(newCard, feed.firstChild);
+      setTimeout(() => newCard.classList.remove('animate-pulse'), 1500);
+    }
+
+    function promptAddExpense() {
+      const cat = prompt('Expense Category:\n(seeds, fertilizer, pesticide, labor, machinery, irrigation)', 'labor');
+      if (!cat) return;
+      const amountStr = prompt('Amount (₹):', '600');
+      const amount = parseFloat(amountStr) || 0;
+      if (amount <= 0) return;
+      const notes = prompt('Notes / Receipt details:', '2 laborers for inter-row soil aeration') || cat;
+
+      farmTotalSpent += amount;
+      document.getElementById('space-total-spent').textContent = '₹' + farmTotalSpent.toLocaleString('en-IN');
+      document.getElementById('space-expenses-total-badge').textContent = '₹' + farmTotalSpent.toLocaleString('en-IN');
+
+      const expList = document.getElementById('space-expenses-list');
+      const newRow = document.createElement('div');
+      newRow.className = 'flex justify-between items-center text-amber-950 font-medium pt-1 border-t border-amber-200/50';
+      newRow.innerHTML = `
+        <span>💼 ${notes}</span>
+        <span class="font-bold">₹${amount}</span>
+      `;
+      expList.appendChild(newRow);
+    }
+
+    function promptFieldPhoto() {
+      const status = prompt('Crop Health Condition:\n1 = 🌿 Healthy\n2 = 🐛 Pest Detected\n3 = 🍂 Yellowing', '1');
+      const label = status === '2' ? '🐛 Pest Detected' : (status === '3' ? '🍂 Yellowing' : '🌿 Healthy');
+      const note = prompt('Photo Observation Note:', 'Healthy leaf canopy, dark green coloration');
+
+      farmActivitiesCount++;
+      document.getElementById('space-total-activities').textContent = farmActivitiesCount + ' Logged';
+      document.getElementById('activity-badge-count').textContent = farmActivitiesCount + ' items';
+
+      const feed = document.getElementById('space-activities-feed');
+      const newCard = document.createElement('div');
+      newCard.className = 'p-2.5 bg-blue-50/70 rounded-xl border border-blue-200 flex items-center justify-between';
+      newCard.innerHTML = `
+        <div class="flex items-center gap-2">
+          <span class="p-1.5 bg-white rounded-lg border border-blue-300 text-xs">📷</span>
+          <div>
+            <p class="font-bold text-slate-900 text-xs">Crop Photo (${label})</p>
+            <p class="text-[10px] text-slate-600">${note || 'Field photo captured'}</p>
+          </div>
+        </div>
+        <span class="text-[10px] text-blue-700 font-semibold">Just now</span>
+      `;
+      feed.insertBefore(newCard, feed.firstChild);
+    }
+
+    // Onboarding Multi-Step Controller
+    let onboardStep = 1;
+    function updateOnboardView() {
+      document.getElementById('onboard-step-1').classList.toggle('hidden', onboardStep !== 1);
+      document.getElementById('onboard-step-2').classList.toggle('hidden', onboardStep !== 2);
+      document.getElementById('onboard-step-3').classList.toggle('hidden', onboardStep !== 3);
+
+      document.getElementById('onboard-prev-btn').classList.toggle('hidden', onboardStep === 1);
+      document.getElementById('onboard-step-label').textContent = 'Step ' + onboardStep + ' of 3';
+      
+      const pct = onboardStep === 1 ? '33%' : (onboardStep === 2 ? '66%' : '100%');
+      document.getElementById('onboard-progress-pct').textContent = pct;
+      document.getElementById('onboard-progress-bar').style.width = pct;
+
+      document.getElementById('ob-next-btn').textContent = onboardStep === 3 ? 'Complete & Open VillageNova →' : 'Next Step →';
+    }
+
+    function nextOnboardStep() {
+      if (onboardStep < 3) {
+        onboardStep++;
+        updateOnboardView();
+      } else {
+        // Apply values to home screen
+        const name = document.getElementById('ob-name').value || 'Ravi';
+        const village = document.getElementById('ob-village').value || 'Ananthagiri';
+        document.getElementById('home-greeting').textContent = 'Good morning, ' + name + ' 👋';
+        document.getElementById('home-location').textContent = village + ' • Vikarabad';
+        setScreen('home');
+      }
+    }
+
+    function prevOnboardStep() {
+      if (onboardStep > 1) {
+        onboardStep--;
+        updateOnboardView();
+      }
+    }
+
+    // Task Checkbox Toggle Logic
+    function toggleTask(checkbox) {
+      const titleSpan = checkbox.parentElement.querySelector('.task-title');
+      if (checkbox.checked) {
+        titleSpan.classList.add('line-through', 'text-slate-500');
+        titleSpan.classList.remove('font-semibold', 'text-slate-800');
+      } else {
+        titleSpan.classList.remove('line-through', 'text-slate-500');
+        titleSpan.classList.add('font-semibold', 'text-slate-800');
+      }
+
+      const all = document.querySelectorAll('.task-checkbox');
+      const checked = document.querySelectorAll('.task-checkbox:checked').length;
+      const total = all.length;
+      const pct = Math.round((checked / total) * 100);
+
+      document.getElementById('progress-percent').textContent = pct + '%';
+      document.getElementById('progress-bar-fill').style.width = pct + '%';
+      document.getElementById('progress-caption').textContent = checked + ' of ' + total + ' planned activities logged this week';
+    }
+
+    // Ask AI Chat Message sender
+    function sendChatMessage() {
+      const input = document.getElementById('chat-input');
+      const text = input.value.trim();
+      if (!text) return;
+
+      const chatStream = document.getElementById('chat-stream');
+
+      // User Bubble
+      const userDiv = document.createElement('div');
+      userDiv.className = 'flex flex-col items-end gap-1 ml-auto max-w-[85%]';
+      userDiv.innerHTML = '<div class="p-3 bg-emerald-700 text-white rounded-2xl rounded-tr-sm shadow-2xs"><p>' + text + '</p></div>';
+      chatStream.appendChild(userDiv);
+      input.value = '';
+
+      // AI Response Simulation
+      setTimeout(() => {
+        const botDiv = document.createElement('div');
+        botDiv.className = 'flex flex-col items-start gap-1 max-w-[90%]';
+        botDiv.innerHTML = `
+          <span class="text-[10px] text-emerald-800 font-bold flex items-center gap-1">✨ VillageNova Response</span>
+          <div class="p-3 bg-white border border-slate-200 rounded-2xl rounded-tl-sm shadow-2xs space-y-1.5">
+            <p class="text-slate-800">Checked your records for <strong>${text}</strong>. Weather in Ananthagiri indicates rain at 6:00 PM. We recommend finishing field chores by 4:30 PM.</p>
+          </div>
+        `;
+        chatStream.appendChild(botDiv);
+        chatStream.scrollTop = chatStream.scrollHeight;
+      }, 600);
+
+      chatStream.scrollTop = chatStream.scrollHeight;
+    }
+  </script>
+</body>
+</html>
