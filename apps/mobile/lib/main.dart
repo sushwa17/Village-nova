@@ -6,6 +6,7 @@ import 'package:villagenova/features/auth/presentation/screens/phone_auth_screen
 import 'package:villagenova/features/onboarding/presentation/screens/onboarding_screen.dart';
 import 'package:villagenova/features/home/presentation/screens/home_screen.dart';
 import 'package:villagenova/features/ask/presentation/screens/ask_screen.dart';
+import 'package:villagenova/features/space/presentation/screens/my_space_screen.dart';
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
@@ -62,8 +63,8 @@ class _VillageNovaAppState extends State<VillageNovaApp> {
                   );
                 },
                 onOpenMySpace: () {
-                  ScaffoldMessenger.of(context).showSnackBar(
-                    const SnackBar(content: Text('My Space: Viewing Soybean Farm Timeline')),
+                  Navigator.of(context).push(
+                    MaterialPageRoute(builder: (_) => const MySpaceScreen()),
                   );
                 },
                 onOpenVillage: () {

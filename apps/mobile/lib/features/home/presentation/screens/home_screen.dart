@@ -355,7 +355,7 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
           child: _buildQuickActionButton(
             icon: Icons.edit_calendar_outlined,
             label: '+ Log Activity',
-            onTap: () {},
+            onTap: widget.onOpenMySpace,
           ),
         ),
         const SizedBox(width: 10),
@@ -363,7 +363,7 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
           child: _buildQuickActionButton(
             icon: Icons.camera_alt_outlined,
             label: '📷 Crop Photo',
-            onTap: () {},
+            onTap: widget.onOpenMySpace,
           ),
         ),
         const SizedBox(width: 10),
@@ -371,7 +371,7 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
           child: _buildQuickActionButton(
             icon: Icons.currency_rupee,
             label: '💰 Add Expense',
-            onTap: () {},
+            onTap: widget.onOpenMySpace,
           ),
         ),
       ],
