@@ -1,6 +1,8 @@
 import 'package:flutter/material.dart';
-import 'package:villagenova/core/theme/app_colors.dart';
+import 'package:villagenova/core/theme/stitch_tokens.dart';
 
+/// Google Stitch Selectable Chip
+/// Filter and selector chip with smooth state transitions and accessible touch sizes.
 class StitchSelectableChip extends StatelessWidget {
   final String label;
   final String? emoji;
@@ -21,45 +23,37 @@ class StitchSelectableChip extends StatelessWidget {
       onTap: onSelected,
       child: AnimatedContainer(
         duration: const Duration(milliseconds: 180),
-        padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
+        padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 10),
         decoration: BoxDecoration(
-          color: isSelected ? const Color(0xFFE8F5E9) : Colors.white,
-          borderRadius: BorderRadius.circular(14),
+          color: isSelected ? StitchTokens.green100 : Colors.white,
+          borderRadius: BorderRadius.circular(StitchTokens.radiusSm),
           border: Border.all(
-            color: isSelected ? AppColors.primaryGreen : const Color(0xFFE5E7EB),
-            width: isSelected ? 2.0 : 1.2,
+            color: isSelected ? StitchTokens.green600 : StitchTokens.slate200,
+            width: isSelected ? 1.8 : 1.0,
           ),
-          boxShadow: isSelected
-              ? const [
-                  BoxShadow(
-                    color: Color(0x1A2E7D32),
-                    blurRadius: 6,
-                    offset: Offset(0, 2),
-                  )
-                ]
-              : null,
+          boxShadow: isSelected ? StitchTokens.shadowSm : StitchTokens.shadow2xs,
         ),
         child: Row(
           mainAxisSize: MainAxisSize.min,
           children: [
             if (emoji != null) ...[
-              Text(emoji!, style: const TextStyle(fontSize: 18)),
-              const SizedBox(width: 8),
+              Text(emoji!, style: const TextStyle(fontSize: 16)),
+              const SizedBox(width: 6),
             ],
             Text(
               label,
               style: TextStyle(
-                fontSize: 15,
+                fontSize: 13.5,
                 fontWeight: isSelected ? FontWeight.w700 : FontWeight.w500,
-                color: isSelected ? AppColors.primaryGreenDark : AppColors.textPrimary,
+                color: isSelected ? StitchTokens.green900 : StitchTokens.slate800,
               ),
             ),
             if (isSelected) ...[
-              const SizedBox(width: 8),
+              const SizedBox(width: 6),
               const Icon(
                 Icons.check_circle,
-                size: 18,
-                color: AppColors.primaryGreen,
+                size: 16,
+                color: StitchTokens.green600,
               ),
             ],
           ],

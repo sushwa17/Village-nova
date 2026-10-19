@@ -1,12 +1,23 @@
 import 'package:flutter/material.dart';
-import 'package:villagenova/core/theme/app_colors.dart';
+import 'package:villagenova/core/theme/stitch_tokens.dart';
 
+enum StitchButtonVariant {
+  primary,
+  secondary,
+  gold,
+  alert,
+}
+
+/// Google Stitch Button Component
+/// Accessible, high-contrast action button adhering to Google Stitch specifications.
 class StitchButton extends StatelessWidget {
   final String text;
   final VoidCallback? onPressed;
   final bool isLoading;
   final bool isSecondary;
+  final StitchButtonVariant variant;
   final IconData? icon;
+  final double height;
 
   const StitchButton({
     super.key,
@@ -14,37 +25,50 @@ class StitchButton extends StatelessWidget {
     required this.onPressed,
     this.isLoading = false,
     this.isSecondary = false,
+    this.variant = StitchButtonVariant.primary,
     this.icon,
+    this.height = 52.0, // High-accessibility rural touch target
   });
 
   @override
   Widget build(BuildContext context) {
-    if (isSecondary) {
+    if (isSecondary || variant == StitchButtonVariant.secondary) {
       return OutlinedButton(
         onPressed: isLoading ? null : onPressed,
         style: OutlinedButton.styleFrom(
-          minimumSize: const Size(double.infinity, 52),
-          side: const BorderSide(color: AppColors.primaryGreen, width: 1.8),
+          minimumSize: Size(double.infinity, height),
+          side: const BorderSide(color: StitchTokens.green700, width: 1.8),
           shape: RoundedRectangleBorder(
-            borderRadius: BorderRadius.circular(14),
+            borderRadius: BorderRadius.circular(StitchTokens.radiusMd),
           ),
         ),
-        child: _buildChild(AppColors.primaryGreen),
+        child: _buildChild(StitchTokens.green700),
       );
+    }
+
+    Color bgColor = StitchTokens.green700;
+    Color textColor = Colors.white;
+
+    if (variant == StitchButtonVariant.gold) {
+      bgColor = StitchTokens.gold500;
+      textColor = StitchTokens.slate900;
+    } else if (variant == StitchButtonVariant.alert) {
+      bgColor = StitchTokens.rose700;
+      textColor = Colors.white;
     }
 
     return ElevatedButton(
       onPressed: isLoading ? null : onPressed,
       style: ElevatedButton.styleFrom(
-        backgroundColor: AppColors.primaryGreen,
-        foregroundColor: Colors.white,
+        backgroundColor: bgColor,
+        foregroundColor: textColor,
         elevation: 0,
-        minimumSize: const Size(double.infinity, 52),
+        minimumSize: Size(double.infinity, height),
         shape: RoundedRectangleBorder(
-          borderRadius: BorderRadius.circular(14),
+          borderRadius: BorderRadius.circular(StitchTokens.radiusMd),
         ),
       ),
-      child: _buildChild(Colors.white),
+      child: _buildChild(textColor),
     );
   }
 
@@ -68,9 +92,8 @@ class StitchButton extends StatelessWidget {
           const SizedBox(width: 8),
           Text(
             text,
-            style: TextStyle(
+            style: StitchTokens.bodyMedium.copyWith(
               fontSize: 16,
-              fontWeight: FontWeight.w600,
               color: textColor,
             ),
           ),
@@ -80,9 +103,8 @@ class StitchButton extends StatelessWidget {
 
     return Text(
       text,
-      style: TextStyle(
+      style: StitchTokens.bodyMedium.copyWith(
         fontSize: 16,
-        fontWeight: FontWeight.w600,
         color: textColor,
       ),
     );

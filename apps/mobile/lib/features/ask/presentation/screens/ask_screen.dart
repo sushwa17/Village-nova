@@ -1,7 +1,11 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:villagenova/core/theme/app_colors.dart';
+import 'package:villagenova/core/theme/stitch_tokens.dart';
 import 'package:villagenova/widgets/stitch_card.dart';
+import 'package:villagenova/widgets/stitch_action_card.dart';
+import 'package:villagenova/widgets/stitch_citation_card.dart';
+import 'package:villagenova/widgets/stitch_badge.dart';
 import 'package:villagenova/providers/ask_provider.dart';
 
 class AskVillageNovaScreen extends ConsumerStatefulWidget {
@@ -180,32 +184,21 @@ class _AskVillageNovaScreenState extends ConsumerState<AskVillageNovaScreen> {
 
             if (actions.isNotEmpty) ...[
               const SizedBox(height: 12),
-              const Text('ACTIONS TO TAKE:', style: TextStyle(fontSize: 12, fontWeight: FontWeight.w800, color: AppColors.textMuted)),
+              const Text(
+                'ACTIONS TO TAKE:',
+                style: TextStyle(
+                  fontSize: 11,
+                  fontWeight: FontWeight.w800,
+                  color: StitchTokens.slate500,
+                  letterSpacing: 0.4,
+                ),
+              ),
               const SizedBox(height: 6),
-              ...actions.map((act) => InkWell(
-                    borderRadius: BorderRadius.circular(10),
+              ...actions.map((act) => StitchActionCard(
+                    title: act['title'] as String? ?? 'Action',
+                    badgeLabel: act['type'] as String? ?? act['action_type'] as String?,
+                    badgeVariant: StitchBadgeVariant.agriculture,
                     onTap: () => ref.read(askProvider.notifier).executeAction(act),
-                    child: Container(
-                      margin: const EdgeInsets.only(bottom: 6),
-                      padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 8),
-                      decoration: BoxDecoration(
-                        color: const Color(0xFFF9FAFB),
-                        borderRadius: BorderRadius.circular(10),
-                        border: Border.all(color: const Color(0xFFF3F4F6)),
-                      ),
-                      child: Row(
-                        mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                        children: [
-                          Expanded(
-                            child: Text(
-                              act['title'] as String,
-                              style: const TextStyle(fontSize: 13, fontWeight: FontWeight.w600, color: AppColors.textPrimary),
-                            ),
-                          ),
-                          const Icon(Icons.arrow_forward_ios, size: 12, color: AppColors.primaryGreen),
-                        ],
-                      ),
-                    ),
                   )),
             ],
 
@@ -214,17 +207,27 @@ class _AskVillageNovaScreenState extends ConsumerState<AskVillageNovaScreen> {
               Container(
                 padding: const EdgeInsets.all(10),
                 decoration: BoxDecoration(
-                  color: const Color(0xFFFFFBEB),
-                  borderRadius: BorderRadius.circular(10),
-                  border: Border.all(color: const Color(0xFFFDE68A)),
+                  color: StitchTokens.gold50,
+                  borderRadius: BorderRadius.circular(StitchTokens.radiusSm),
+                  border: Border.all(color: StitchTokens.gold200),
                 ),
-                child: Text('💡 Why: $why', style: const TextStyle(fontSize: 12.5, color: Color(0xFF92400E))),
+                child: Text(
+                  '💡 Why: $why',
+                  style: StitchTokens.body.copyWith(
+                    fontSize: 12.5,
+                    color: StitchTokens.gold900,
+                    fontWeight: FontWeight.w500,
+                  ),
+                ),
               ),
             ],
 
             if (source != null) ...[
-              const SizedBox(height: 10),
-              Text('Source: $source', style: const TextStyle(fontSize: 11, color: AppColors.textMuted)),
+              StitchCitationCard(
+                title: source,
+                sourceType: 'PJTSAU / Official Registry',
+                timestamp: 'Kharif 2026',
+              ),
             ],
           ],
         ),

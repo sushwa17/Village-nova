@@ -53,6 +53,9 @@
       <button onclick="setScreen('village')" id="pill-village" class="px-2.5 py-1 rounded-lg text-xs font-semibold bg-slate-800 text-slate-300 hover:bg-slate-700 transition-all">
         7. Village
       </button>
+      <button onclick="toggleStitchModal()" id="pill-stitch" class="px-2.5 py-1 rounded-lg text-xs font-bold bg-emerald-950 text-emerald-400 border border-emerald-500/50 hover:bg-emerald-900 transition-all">
+        🎨 Google Stitch
+      </button>
     </div>
   </header>
 
@@ -1036,6 +1039,198 @@
     </div>
   </div>
 
+  <!-- ============================================================ -->
+  <!-- GOOGLE STITCH DESIGN SYSTEM TOKENS & COMPONENT SHOWCASE MODAL -->
+  <!-- ============================================================ -->
+  <div id="stitch-modal" class="hidden fixed inset-0 z-50 bg-slate-950/80 backdrop-blur-sm flex items-center justify-center p-4">
+    <div class="bg-white text-slate-900 rounded-3xl max-w-2xl w-full max-h-[90vh] overflow-y-auto p-6 shadow-2xl border border-slate-200 custom-scrollbar">
+      <!-- Modal Header -->
+      <div class="flex items-center justify-between pb-4 border-b border-slate-200">
+        <div class="flex items-center gap-3">
+          <div class="w-10 h-10 rounded-2xl bg-emerald-700 text-white flex items-center justify-center text-xl shadow-md shadow-emerald-700/30">
+            🎨
+          </div>
+          <div>
+            <h2 class="text-lg font-extrabold text-slate-900 tracking-tight">Google Stitch Design System</h2>
+            <p class="text-xs text-slate-500">Official Design-to-Code Tokens & Components for VillageNova</p>
+          </div>
+        </div>
+        <button onclick="toggleStitchModal()" class="w-8 h-8 rounded-full bg-slate-100 hover:bg-slate-200 text-slate-600 flex items-center justify-center font-bold text-sm">
+          ✕
+        </button>
+      </div>
+
+      <!-- 1. Color Palette Tokens -->
+      <div class="mt-5 space-y-3">
+        <div class="flex items-center justify-between">
+          <h3 class="text-xs font-extrabold text-slate-400 uppercase tracking-wider">1. Brand & Domain Color Tokens</h3>
+          <span class="text-[10px] text-emerald-700 font-bold bg-emerald-50 px-2 py-0.5 rounded">Accessible WCAG AAA</span>
+        </div>
+        <div class="grid grid-cols-2 sm:grid-cols-4 gap-2.5 text-xs">
+          <!-- Primary Green -->
+          <div class="p-2.5 rounded-xl border border-emerald-200 bg-emerald-50 flex items-center gap-2">
+            <div class="w-7 h-7 rounded-lg bg-emerald-700 border border-emerald-800 shadow-2xs"></div>
+            <div>
+              <p class="font-extrabold text-slate-900 text-[11px]">Primary Green</p>
+              <p class="text-[9px] text-slate-500 font-mono">#15803D • 700</p>
+            </div>
+          </div>
+          <!-- Dark Green -->
+          <div class="p-2.5 rounded-xl border border-emerald-900/20 bg-emerald-950/5 flex items-center gap-2">
+            <div class="w-7 h-7 rounded-lg bg-emerald-950 border border-emerald-900 shadow-2xs"></div>
+            <div>
+              <p class="font-extrabold text-slate-900 text-[11px]">Dark Green</p>
+              <p class="text-[9px] text-slate-500 font-mono">#14532D • 900</p>
+            </div>
+          </div>
+          <!-- Crop Gold -->
+          <div class="p-2.5 rounded-xl border border-amber-200 bg-amber-50 flex items-center gap-2">
+            <div class="w-7 h-7 rounded-lg bg-amber-500 border border-amber-600 shadow-2xs"></div>
+            <div>
+              <p class="font-extrabold text-slate-900 text-[11px]">Crop Gold</p>
+              <p class="text-[9px] text-slate-500 font-mono">#EAB308 • 500</p>
+            </div>
+          </div>
+          <!-- Sky Blue -->
+          <div class="p-2.5 rounded-xl border border-sky-200 bg-sky-50 flex items-center gap-2">
+            <div class="w-7 h-7 rounded-lg bg-sky-600 border border-sky-700 shadow-2xs"></div>
+            <div>
+              <p class="font-extrabold text-slate-900 text-[11px]">Sky Weather</p>
+              <p class="text-[9px] text-slate-500 font-mono">#0284C7 • 600</p>
+            </div>
+          </div>
+          <!-- Alert Rose -->
+          <div class="p-2.5 rounded-xl border border-rose-200 bg-rose-50 flex items-center gap-2">
+            <div class="w-7 h-7 rounded-lg bg-rose-700 border border-rose-800 shadow-2xs"></div>
+            <div>
+              <p class="font-extrabold text-slate-900 text-[11px]">Alert Rose</p>
+              <p class="text-[9px] text-slate-500 font-mono">#BE123C • 700</p>
+            </div>
+          </div>
+          <!-- Slate High Contrast -->
+          <div class="p-2.5 rounded-xl border border-slate-200 bg-slate-50 flex items-center gap-2">
+            <div class="w-7 h-7 rounded-lg bg-slate-900 border border-black shadow-2xs"></div>
+            <div>
+              <p class="font-extrabold text-slate-900 text-[11px]">Neutral Slate</p>
+              <p class="text-[9px] text-slate-500 font-mono">#0F172A • 900</p>
+            </div>
+          </div>
+          <!-- Slate Border -->
+          <div class="p-2.5 rounded-xl border border-slate-200 bg-white flex items-center gap-2">
+            <div class="w-7 h-7 rounded-lg bg-slate-200 border border-slate-300 shadow-2xs"></div>
+            <div>
+              <p class="font-extrabold text-slate-900 text-[11px]">Border Slate</p>
+              <p class="text-[9px] text-slate-500 font-mono">#E2E8F0 • 200</p>
+            </div>
+          </div>
+          <!-- Foliage Tint -->
+          <div class="p-2.5 rounded-xl border border-emerald-200 bg-white flex items-center gap-2">
+            <div class="w-7 h-7 rounded-lg bg-emerald-50 border border-emerald-200 shadow-2xs"></div>
+            <div>
+              <p class="font-extrabold text-slate-900 text-[11px]">Surface Green</p>
+              <p class="text-[9px] text-slate-500 font-mono">#F0FDF4 • 50</p>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- 2. Radius & Elevation Tokens -->
+      <div class="mt-6 space-y-3">
+        <h3 class="text-xs font-extrabold text-slate-400 uppercase tracking-wider">2. Radius & Shadow Tokens</h3>
+        <div class="grid grid-cols-2 sm:grid-cols-4 gap-2.5 text-center text-xs">
+          <div class="p-3 bg-slate-50 border border-slate-200 rounded-[10px]">
+            <p class="font-bold text-slate-800">radiusSm (10px)</p>
+            <p class="text-[10px] text-slate-400">Chips & Badges</p>
+          </div>
+          <div class="p-3 bg-slate-50 border border-slate-200 rounded-[14px]">
+            <p class="font-bold text-slate-800">radiusMd (14px)</p>
+            <p class="text-[10px] text-slate-400">Buttons & Inputs</p>
+          </div>
+          <div class="p-3 bg-slate-50 border border-slate-200 rounded-[18px]">
+            <p class="font-bold text-slate-800">radiusLg (18px)</p>
+            <p class="text-[10px] text-slate-400">Stitch Standard Cards</p>
+          </div>
+          <div class="p-3 bg-slate-50 border border-slate-200 rounded-[24px]">
+            <p class="font-bold text-slate-800">radiusXl (24px)</p>
+            <p class="text-[10px] text-slate-400">Sheets & Modals</p>
+          </div>
+        </div>
+      </div>
+
+      <!-- 3. Component Showcase (Live Stitch Widgets) -->
+      <div class="mt-6 space-y-4">
+        <h3 class="text-xs font-extrabold text-slate-400 uppercase tracking-wider">3. Live Google Stitch Components</h3>
+        
+        <!-- Stitch Action Card -->
+        <div class="space-y-1.5">
+          <p class="text-xs font-bold text-slate-700">A. StitchActionCard (Tactile AI Recommendation Card)</p>
+          <div class="p-3 bg-white border border-slate-200 rounded-[14px] shadow-2xs flex items-center justify-between hover:border-emerald-500 cursor-pointer transition-all">
+            <div class="flex items-center gap-2.5">
+              <span class="w-8 h-8 rounded-lg bg-emerald-50 border border-emerald-200 flex items-center justify-center text-base">💧</span>
+              <div>
+                <p class="font-bold text-slate-900 text-xs">Check soil moisture before 6:00 PM rain</p>
+                <p class="text-[10px] text-slate-500">Vegetative Stage Day 42 • Prevents runoff</p>
+              </div>
+            </div>
+            <div class="flex items-center gap-1.5">
+              <span class="px-2 py-0.5 rounded-full bg-emerald-100 text-emerald-800 text-[10px] font-extrabold">Irrigation</span>
+              <span class="text-emerald-700 font-bold text-xs">→</span>
+            </div>
+          </div>
+        </div>
+
+        <!-- Stitch Citation Card -->
+        <div class="space-y-1.5">
+          <p class="text-xs font-bold text-slate-700">B. StitchCitationCard (Verified University & Govt Authority)</p>
+          <div class="p-2.5 bg-slate-50 border border-slate-200 rounded-[10px] flex items-center justify-between">
+            <div class="flex items-center gap-2">
+              <span class="text-emerald-700 text-base">📖</span>
+              <div>
+                <p class="font-bold text-slate-900 text-xs">PJTSAU Krishi Vigyan Kendra Bulletin (Kharif 2026)</p>
+                <p class="text-[10px] text-slate-500">Official Agriculture Advisory • Verified 2h ago</p>
+              </div>
+            </div>
+            <span class="px-2 py-0.5 rounded-full bg-emerald-100 text-emerald-800 text-[10px] font-extrabold flex items-center gap-1">
+              ✓ Verified Official
+            </span>
+          </div>
+        </div>
+
+        <!-- Stitch Button Variants -->
+        <div class="space-y-1.5">
+          <p class="text-xs font-bold text-slate-700">C. StitchButton (Accessible Rural Touch Targets: min 52px)</p>
+          <div class="grid grid-cols-1 sm:grid-cols-2 gap-2 text-xs">
+            <button class="h-[50px] bg-emerald-700 hover:bg-emerald-800 text-white font-bold rounded-[14px] flex items-center justify-center gap-2 shadow-sm transition-all">
+              <span>🌾</span> Primary Action (Green 700)
+            </button>
+            <button class="h-[50px] bg-white border-2 border-emerald-700 text-emerald-800 font-bold rounded-[14px] flex items-center justify-center gap-2 hover:bg-emerald-50 transition-all">
+              Secondary Outlined Action
+            </button>
+          </div>
+        </div>
+
+        <!-- Stitch Badge Variants -->
+        <div class="space-y-1.5">
+          <p class="text-xs font-bold text-slate-700">D. StitchBadge (Category & Status Badges)</p>
+          <div class="flex flex-wrap gap-1.5 text-xs">
+            <span class="px-2.5 py-1 rounded-full bg-emerald-100 text-emerald-800 border border-emerald-300 font-bold text-[10px]">🌾 Agriculture</span>
+            <span class="px-2.5 py-1 rounded-full bg-blue-100 text-blue-800 border border-blue-200 font-bold text-[10px]">🏛️ Panchayat</span>
+            <span class="px-2.5 py-1 rounded-full bg-amber-100 text-amber-900 border border-amber-300 font-bold text-[10px]">⭐ PM-KISAN Match</span>
+            <span class="px-2.5 py-1 rounded-full bg-rose-100 text-rose-800 border border-rose-300 font-bold text-[10px]">🚨 URGENT</span>
+            <span class="px-2.5 py-1 rounded-full bg-slate-100 text-slate-700 border border-slate-200 font-bold text-[10px]">Stable APMC</span>
+          </div>
+        </div>
+      </div>
+
+      <!-- Footer Note -->
+      <div class="mt-6 pt-4 border-t border-slate-200 text-center">
+        <p class="text-xs text-slate-500">
+          Google Stitch Tokens synchronized with Flutter (<code class="bg-slate-100 px-1.5 py-0.5 rounded text-emerald-800 font-mono">apps/mobile/lib/core/theme/stitch_tokens.dart</code>)
+        </p>
+      </div>
+    </div>
+  </div>
+
   <script>
     // State Router for Mobile Screens
     function setScreen(screenName) {
@@ -1054,6 +1249,14 @@
           }
         }
       });
+    }
+
+    // Google Stitch Modal Controller
+    function toggleStitchModal() {
+      const modal = document.getElementById('stitch-modal');
+      if (modal) {
+        modal.classList.toggle('hidden');
+      }
     }
 
     // Interactive Village Feed Functions (Week 6 Engine)
