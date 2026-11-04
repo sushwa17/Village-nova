@@ -325,6 +325,27 @@ def execute_quick_farm_action(
     }
 
 
+def search_knowledge_base(query: str, domain: Optional[str] = None) -> Dict[str, Any]:
+    """
+    Searches official agricultural university advisories, ICAR manuals, and government scheme gazettes
+    using semantic vector search for verified factual grounding.
+
+    Args:
+        query: Grounding query (e.g. 'whitefly yellow mosaic soybean treatment', 'pm kisan eligibility')
+        domain: Optional filter ('agronomy', 'schemes', 'weather', 'mandi')
+
+    Returns:
+        Ranked official advisory chunks with issuing authorities and official citation links.
+    """
+    from app.services.knowledge import knowledge_service
+    results = knowledge_service.search(query=query, top_k=2, domain=domain)
+    return {
+        "query": query,
+        "total_results": len(results),
+        "results": [r.model_dump() for r in results]
+    }
+
+
 # Tool Declarations Manifest for Gemini and Dispatcher
 TOOL_MANIFEST: List[Dict[str, Any]] = [
     {
@@ -407,5 +428,18 @@ TOOL_MANIFEST: List[Dict[str, Any]] = [
             "required": ["user_id", "action_type"]
         },
         "callable": execute_quick_farm_action
+    },
+    {
+        "name": "search_knowledge_base",
+        "description": "Search official agricultural university advisories, ICAR manuals, and government scheme gazettes for verified grounding.",
+        "parameters": {
+            "type": "object",
+            "properties": {
+                "query": {"type": "string", "description": "Search query keywords (e.g. 'whitefly yellow mosaic soybean', 'pm kisan eligibility')"},
+                "domain": {"type": "string", "description": "Optional domain filter (agronomy, schemes, weather, mandi)"}
+            },
+            "required": ["query"]
+        },
+        "callable": search_knowledge_base
     }
 ]

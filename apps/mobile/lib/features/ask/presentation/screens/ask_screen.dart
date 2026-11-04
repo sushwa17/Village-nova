@@ -30,6 +30,92 @@ class _AskVillageNovaScreenState extends ConsumerState<AskVillageNovaScreen> {
     ref.read(askProvider.notifier).sendQuery(query);
   }
 
+  void _showDocumentDetailsModal(BuildContext context, Map<String, dynamic> source) {
+    showModalBottomSheet(
+      context: context,
+      shape: const RoundedRectangleBorder(
+        borderRadius: BorderRadius.vertical(top: Radius.circular(24)),
+      ),
+      backgroundColor: Colors.white,
+      builder: (ctx) => Padding(
+        padding: const EdgeInsets.all(20.0),
+        child: Column(
+          mainAxisSize: MainAxisSize.min,
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Row(
+              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+              children: [
+                const StitchBadge(
+                  label: 'Verified Knowledge Source ✓',
+                  variant: StitchBadgeVariant.verified,
+                ),
+                IconButton(
+                  icon: const Icon(Icons.close, size: 20),
+                  onPressed: () => Navigator.pop(ctx),
+                ),
+              ],
+            ),
+            const SizedBox(height: 12),
+            Text(
+              source['title'] as String? ?? 'Official Document',
+              style: StitchTokens.title,
+            ),
+            const SizedBox(height: 6),
+            Text(
+              'Authority: ${source['source_type'] ?? "Official Government / University Portal"}',
+              style: StitchTokens.bodyMedium.copyWith(color: StitchTokens.green700),
+            ),
+            if (source['timestamp'] != null) ...[
+              const SizedBox(height: 4),
+              Text(
+                'Published / Verified: ${source['timestamp']}',
+                style: StitchTokens.caption,
+              ),
+            ],
+            if (source['url'] != null) ...[
+              const SizedBox(height: 12),
+              Container(
+                padding: const EdgeInsets.all(10),
+                decoration: BoxDecoration(
+                  color: StitchTokens.slate50,
+                  borderRadius: BorderRadius.circular(10),
+                  border: Border.all(color: StitchTokens.slate200),
+                ),
+                child: Row(
+                  children: [
+                    const Icon(Icons.link, size: 16, color: StitchTokens.slate600),
+                    const SizedBox(width: 8),
+                    Expanded(
+                      child: Text(
+                        source['url'] as String,
+                        style: const TextStyle(fontSize: 12, color: Colors.blue, decoration: TextDecoration.underline),
+                        overflow: TextOverflow.ellipsis,
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+            ],
+            const SizedBox(height: 20),
+            SizedBox(
+              width: double.infinity,
+              child: ElevatedButton(
+                style: ElevatedButton.styleFrom(
+                  backgroundColor: AppColors.primaryGreen,
+                  foregroundColor: Colors.white,
+                  shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+                ),
+                onPressed: () => Navigator.pop(ctx),
+                child: const Text('Back to Conversation'),
+              ),
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+
   @override
   Widget build(BuildContext context) {
     final askState = ref.watch(askProvider);
@@ -159,7 +245,8 @@ class _AskVillageNovaScreenState extends ConsumerState<AskVillageNovaScreen> {
   Widget _buildAIStructuredCard(ChatMessageItem msg) {
     final actions = msg.actions;
     final why = msg.whyAdvisory;
-    final source = msg.sourceCitation;
+    final sources = msg.sources;
+    final fallbackSource = msg.sourceCitation;
 
     return Container(
       margin: const EdgeInsets.only(bottom: 16, right: 24),
@@ -222,9 +309,28 @@ class _AskVillageNovaScreenState extends ConsumerState<AskVillageNovaScreen> {
               ),
             ],
 
-            if (source != null) ...[
+            if (sources.isNotEmpty) ...[
+              const SizedBox(height: 10),
+              const Text(
+                'OFFICIAL VERIFIED SOURCES:',
+                style: TextStyle(
+                  fontSize: 10.5,
+                  fontWeight: FontWeight.w800,
+                  color: StitchTokens.slate500,
+                  letterSpacing: 0.4,
+                ),
+              ),
+              ...sources.map((s) => StitchCitationCard(
+                    title: s['title'] as String? ?? 'Official Advisory',
+                    sourceType: s['source_type'] as String? ?? 'Agricultural Advisory',
+                    timestamp: s['timestamp'] as String? ?? 'Kharif 2026',
+                    url: s['url'] as String?,
+                    onTap: () => _showDocumentDetailsModal(context, s),
+                  )),
+            ] else if (fallbackSource != null) ...[
+              const SizedBox(height: 10),
               StitchCitationCard(
-                title: source,
+                title: fallbackSource,
                 sourceType: 'PJTSAU / Official Registry',
                 timestamp: 'Kharif 2026',
               ),

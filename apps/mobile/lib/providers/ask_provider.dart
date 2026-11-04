@@ -8,6 +8,7 @@ class ChatMessageItem {
   final List<Map<String, dynamic>> actions;
   final String? whyAdvisory;
   final String? sourceCitation;
+  final List<Map<String, dynamic>> sources;
 
   ChatMessageItem({
     required this.isUser,
@@ -15,6 +16,7 @@ class ChatMessageItem {
     this.actions = const [],
     this.whyAdvisory,
     this.sourceCitation,
+    this.sources = const [],
   });
 }
 
@@ -49,6 +51,7 @@ class AskNotifier extends StateNotifier<AskState> {
                 isUser: false,
                 text: 'Good morning Ravi! 👋 I am your VillageNova companion. What would you like guidance on today?',
                 actions: [],
+                sources: [],
               ),
             ],
           ),
@@ -75,15 +78,20 @@ class AskNotifier extends StateNotifier<AskState> {
                 ?.map((e) => Map<String, dynamic>.from(e as Map))
                 .toList() ??
             [];
+        final rawSources = (data['sources'] as List<dynamic>?)
+                ?.map((e) => Map<String, dynamic>.from(e as Map))
+                .toList() ??
+            [];
 
         final aiMessage = ChatMessageItem(
           isUser: false,
           text: data['message'] as String? ?? 'Here is your guidance:',
           actions: rawActions,
           whyAdvisory: data['why_advisory'] as String?,
-          sourceCitation: (data['sources'] as List<dynamic>?)?.isNotEmpty == true
-              ? data['sources'][0]['title'] as String?
+          sourceCitation: rawSources.isNotEmpty
+              ? rawSources[0]['title'] as String?
               : null,
+          sources: rawSources,
         );
 
         state = state.copyWith(
@@ -107,7 +115,21 @@ class AskNotifier extends StateNotifier<AskState> {
         {'id': '3', 'title': '📷 Record a crop observation photo', 'type': 'observation'},
       ],
       whyAdvisory: 'Rain is forecasted in Ananthagiri at 6:00 PM (14 mm). Checking moisture now prevents over-saturation.',
-      sourceCitation: 'Open-Meteo & PJTSAU Agriculture Advisory • Today 11:30 AM',
+      sourceCitation: 'PJTSAU Soybean Kharif 2026 Package of Practices',
+      sources: [
+        {
+          'title': 'PJTSAU Soybean Kharif 2026 Package of Practices',
+          'source_type': 'university_advisory',
+          'timestamp': 'Kharif 2026 Bulletin #4',
+          'url': 'https://pjtsau.edu.in/agronomy/soybean-kharif-2026',
+        },
+        {
+          'title': 'IMD Agro-Meteorology Rain-Fastness Protocol',
+          'source_type': 'weather_api',
+          'timestamp': 'Standard Operating Procedure 2026',
+          'url': 'https://mausam.imd.gov.in/agromet',
+        }
+      ],
     );
 
     state = state.copyWith(

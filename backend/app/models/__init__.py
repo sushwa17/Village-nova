@@ -4,6 +4,7 @@ from app.models.village import VillageUpdate
 from app.models.scheme import Scheme, SchemeMatch
 from app.models.task import Task
 from app.models.conversation import Conversation, Message, AIToolCall
+from app.models.knowledge import KnowledgeChunk
 
 __all__ = [
     "Village",
@@ -21,4 +22,5 @@ __all__ = [
     "Conversation",
     "Message",
     "AIToolCall",
+    "KnowledgeChunk",
 ]
