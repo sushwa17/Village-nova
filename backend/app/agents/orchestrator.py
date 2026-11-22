@@ -1,14 +1,16 @@
 from typing import Dict, Any, List, Optional
-from pydantic import BaseModel, Field
+from pydantic import BaseModel, Field, ConfigDict
 import json
 import logging
 import asyncio
 import os
 import sys
+import time
 
 from app.core.config import settings
 from app.agents.dispatcher import ToolDispatcher
 from app.services.knowledge import knowledge_service, KnowledgeSearchResult
+from app.services.cache import semantic_cache
 
 logger = logging.getLogger(__name__)
 
@@ -28,18 +30,25 @@ class SourceCitation(BaseModel):
 
 
 class AskResponsePayload(BaseModel):
+    model_config = ConfigDict(protected_namespaces=())
+
     message: str
     actions: List[ActionItem] = Field(default_factory=list)
     why_advisory: Optional[str] = None
     sources: List[SourceCitation] = Field(default_factory=list)
     follow_up_questions: List[str] = Field(default_factory=list)
+    conversation_id: Optional[str] = None
+    latency_ms: Optional[int] = None
+    cached: bool = False
+    model_used: Optional[str] = None
 
 
 class AIOrchestrator:
     """
-    Ask VillageNova Conversational AI Orchestrator.
+    Ask VillageNova Conversational AI Orchestrator (Phase 3, Week 10).
     Dual-engine architecture:
-    1. Primary: Google Gemini GenAI SDK with pgvector knowledge grounding and structured action card generation.
+    1. Primary: Google Gemini GenAI SDK with pgvector knowledge grounding, structured action card generation,
+       and sub-50ms semantic query caching.
     2. Fallback: High-precision regional agronomy & rural intelligence engine grounded in official advisories.
     """
 
@@ -61,33 +70,74 @@ class AIOrchestrator:
     async def process_query(
         self,
         resident_context: Dict[str, Any],
-        user_message: str
+        user_message: str,
+        conversation_id: Optional[str] = None
     ) -> AskResponsePayload:
         """
-        Executes query analysis using Gemini with pgvector knowledge grounding if available,
-        or grounded regional rule engine.
+        Executes query analysis:
+        1. Checks semantic cache for sub-50ms repeat answers.
+        2. Calls Gemini 3.8 Flash with pgvector knowledge grounding if available.
+        3. Falls back seamlessly to regional agronomic rule engine with verified citations.
         """
+        start_time = time.perf_counter()
+        village = resident_context.get("village", "default")
+        crop_name = resident_context.get("crop", {}).get("crop_name", "default")
+        context_scope = f"{village}_{crop_name}"
+
+        # 1. Semantic Response Cache Check
+        cached_result = semantic_cache.get(user_message, context_scope=context_scope)
+        if cached_result:
+            latency = max(1, int((time.perf_counter() - start_time) * 1000))
+            cached_result["conversation_id"] = conversation_id
+            cached_result["latency_ms"] = latency
+            cached_result["cached"] = True
+            cached_result["model_used"] = "semantic-cache"
+            return AskResponsePayload(**cached_result)
+
+        # 2. Testing Environment Override
         if os.getenv("TESTING", "").lower() in ("true", "1") or "pytest" in sys.modules:
-            return self._fallback_rule_engine(resident_context, user_message)
+            response = self._fallback_rule_engine(resident_context, user_message)
+            latency = max(1, int((time.perf_counter() - start_time) * 1000))
+            response.latency_ms = latency
+            response.conversation_id = conversation_id
+            response.cached = False
+            response.model_used = "regional-rule-engine"
+            # Populate cache
+            semantic_cache.set(user_message, response.model_dump(), context_scope=context_scope)
+            return response
 
+        # 3. Gemini LLM Call with Grounding
         client = self._get_client()
-
         if client:
             try:
                 loop = asyncio.get_running_loop()
-                response = await loop.run_in_executor(
+                gemini_response = await loop.run_in_executor(
                     None,
                     self._call_gemini,
                     resident_context,
                     user_message
                 )
-                if response:
-                    return response
+                if gemini_response:
+                    latency = max(1, int((time.perf_counter() - start_time) * 1000))
+                    gemini_response.latency_ms = latency
+                    gemini_response.conversation_id = conversation_id
+                    gemini_response.cached = False
+                    gemini_response.model_used = self.model_name
+                    # Populate cache
+                    semantic_cache.set(user_message, gemini_response.model_dump(), context_scope=context_scope)
+                    return gemini_response
             except Exception as e:
                 logger.info(f"Gemini call bypassed/failed, engaging fallback rule engine: {e}")
 
-        # Seamless Fallback to Contextual Agronomic & Rural Rule Engine
-        return self._fallback_rule_engine(resident_context, user_message)
+        # 4. Fallback to Grounded Regional Engine
+        fallback_response = self._fallback_rule_engine(resident_context, user_message)
+        latency = max(1, int((time.perf_counter() - start_time) * 1000))
+        fallback_response.latency_ms = latency
+        fallback_response.conversation_id = conversation_id
+        fallback_response.cached = False
+        fallback_response.model_used = "regional-rule-engine"
+        semantic_cache.set(user_message, fallback_response.model_dump(), context_scope=context_scope)
+        return fallback_response
 
     def _call_gemini(
         self,
@@ -141,6 +191,7 @@ Guidelines:
                 response_schema=AskResponsePayload,
                 system_instruction=system_instruction,
                 temperature=0.2,
+                top_p=0.85,
             )
             res = client.models.generate_content(
                 model=self.model_name,

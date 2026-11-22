@@ -121,6 +121,7 @@ class _AskVillageNovaScreenState extends ConsumerState<AskVillageNovaScreen> {
     final askState = ref.watch(askProvider);
     final messages = askState.messages;
     final isLoading = askState.isLoading;
+    final isOffline = askState.isOffline;
 
     return Scaffold(
       backgroundColor: AppColors.backgroundLight,
@@ -135,11 +136,53 @@ class _AskVillageNovaScreenState extends ConsumerState<AskVillageNovaScreen> {
             ),
           ],
         ),
+        actions: [
+          // Network Offline Toggle
+          IconButton(
+            tooltip: isOffline ? 'Switch to Online' : 'Simulate Offline',
+            icon: Icon(
+              isOffline ? Icons.wifi_off : Icons.wifi,
+              color: isOffline ? Colors.amberAccent : Colors.white70,
+              size: 20,
+            ),
+            onPressed: () {
+              ref.read(askProvider.notifier).toggleOfflineMode(!isOffline);
+            },
+          ),
+          // Clear Conversation
+          IconButton(
+            tooltip: 'Clear Chat History',
+            icon: const Icon(Icons.delete_outline, color: Colors.white70, size: 20),
+            onPressed: () {
+              ref.read(askProvider.notifier).clearConversation();
+            },
+          ),
+        ],
         backgroundColor: AppColors.primaryGreen,
         foregroundColor: Colors.white,
       ),
       body: Column(
         children: [
+          // Offline Banner Indicator
+          if (isOffline)
+            Container(
+              width: double.infinity,
+              padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+              color: StitchTokens.gold100,
+              child: Row(
+                children: [
+                  const Icon(Icons.cloud_off, size: 16, color: StitchTokens.gold900),
+                  const SizedBox(width: 8),
+                  Expanded(
+                    child: Text(
+                      'Working in Offline Mode. Messages will be queued and sent when connected.',
+                      style: StitchTokens.caption.copyWith(color: StitchTokens.gold900, fontWeight: FontWeight.w600),
+                    ),
+                  ),
+                ],
+              ),
+            ),
+
           // Quick Prompts Bar
           _buildQuickPromptsBar(),
 
@@ -180,7 +223,7 @@ class _AskVillageNovaScreenState extends ConsumerState<AskVillageNovaScreen> {
                 }
                 final msg = messages[index];
                 if (msg.isUser) {
-                  return _buildUserBubble(msg.text);
+                  return _buildUserBubble(msg);
                 } else {
                   return _buildAIStructuredCard(msg);
                 }
@@ -224,19 +267,54 @@ class _AskVillageNovaScreenState extends ConsumerState<AskVillageNovaScreen> {
     );
   }
 
-  Widget _buildUserBubble(String text) {
+  Widget _buildUserBubble(ChatMessageItem msg) {
+    final isPending = msg.status == MessageStatus.pending;
+    final isFailed = msg.status == MessageStatus.failed;
+
     return Align(
       alignment: Alignment.centerRight,
       child: Container(
         margin: const EdgeInsets.only(bottom: 12, left: 48),
-        padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
-        decoration: BoxDecoration(
-          color: AppColors.primaryGreen,
-          borderRadius: BorderRadius.circular(18).copyWith(bottomRight: const Radius.circular(4)),
-        ),
-        child: Text(
-          text,
-          style: const TextStyle(color: Colors.white, fontSize: 15, fontWeight: FontWeight.w500),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.end,
+          children: [
+            Container(
+              padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
+              decoration: BoxDecoration(
+                color: isPending ? Colors.grey.shade600 : AppColors.primaryGreen,
+                borderRadius: BorderRadius.circular(18).copyWith(bottomRight: const Radius.circular(4)),
+              ),
+              child: Text(
+                msg.text,
+                style: const TextStyle(color: Colors.white, fontSize: 15, fontWeight: FontWeight.w500),
+              ),
+            ),
+            if (isPending) ...[
+              const SizedBox(height: 4),
+              Row(
+                mainAxisSize: MainAxisSize.min,
+                children: const [
+                  Icon(Icons.schedule, size: 12, color: StitchTokens.gold600),
+                  SizedBox(width: 4),
+                  Text('Queued (Offline)', style: TextStyle(fontSize: 10, color: StitchTokens.gold600, fontWeight: FontWeight.w600)),
+                ],
+              ),
+            ],
+            if (isFailed) ...[
+              const SizedBox(height: 4),
+              InkWell(
+                onTap: () => ref.read(askProvider.notifier).retryMessage(msg.id),
+                child: Row(
+                  mainAxisSize: MainAxisSize.min,
+                  children: const [
+                    Icon(Icons.refresh, size: 12, color: StitchTokens.rose700),
+                    SizedBox(width: 4),
+                    Text('Failed • Tap to Retry', style: TextStyle(fontSize: 10, color: StitchTokens.rose700, fontWeight: FontWeight.w700)),
+                  ],
+                ),
+              ),
+            ],
+          ],
         ),
       ),
     );
@@ -247,6 +325,8 @@ class _AskVillageNovaScreenState extends ConsumerState<AskVillageNovaScreen> {
     final why = msg.whyAdvisory;
     final sources = msg.sources;
     final fallbackSource = msg.sourceCitation;
+    final latency = msg.latencyMs;
+    final isCached = msg.cached;
 
     return Container(
       margin: const EdgeInsets.only(bottom: 16, right: 24),
@@ -255,12 +335,29 @@ class _AskVillageNovaScreenState extends ConsumerState<AskVillageNovaScreen> {
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            // AI Header
+            // AI Header & Performance Telemetry
             Row(
-              children: const [
-                Icon(Icons.auto_awesome, color: AppColors.primaryGreen, size: 18),
-                SizedBox(width: 6),
-                Text('VillageNova Guidance', style: TextStyle(fontSize: 13, fontWeight: FontWeight.w700, color: AppColors.primaryGreen)),
+              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+              children: [
+                Row(
+                  children: const [
+                    Icon(Icons.auto_awesome, color: AppColors.primaryGreen, size: 18),
+                    SizedBox(width: 6),
+                    Text('VillageNova Guidance', style: TextStyle(fontSize: 13, fontWeight: FontWeight.w700, color: AppColors.primaryGreen)),
+                  ],
+                ),
+                if (isCached)
+                  Container(
+                    padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 2),
+                    decoration: BoxDecoration(
+                      color: StitchTokens.green50,
+                      borderRadius: BorderRadius.circular(6),
+                      border: Border.all(color: StitchTokens.green200),
+                    ),
+                    child: Text('⚡ ${latency ?? 35}ms (Cached)', style: const TextStyle(fontSize: 10, fontWeight: FontWeight.w700, color: StitchTokens.green800)),
+                  )
+                else if (latency != null)
+                  Text('⏱️ ${latency}ms', style: const TextStyle(fontSize: 10, color: StitchTokens.slate400, fontWeight: FontWeight.w600)),
               ],
             ),
             const SizedBox(height: 8),

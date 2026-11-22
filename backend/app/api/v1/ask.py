@@ -1,4 +1,4 @@
-from fastapi import APIRouter, Depends
+from fastapi import APIRouter, Depends, HTTPException, status
 from pydantic import BaseModel, Field
 from typing import Optional, Dict, Any, List
 from sqlalchemy.ext.asyncio import AsyncSession
@@ -9,12 +9,14 @@ from app.agents.context_builder import build_resident_context
 from app.agents.orchestrator import orchestrator, AskResponsePayload
 from app.agents.dispatcher import dispatcher
 from app.schemas.common import APIResponse
+from app.services.cache import semantic_cache, rate_limiter, check_ask_rate_limit
+from app.services.conversation import conversation_manager, MAX_MESSAGE_CHARACTERS
 
 router = APIRouter(prefix="/ask", tags=["Ask VillageNova AI"])
 
 
 class AskRequestPayload(BaseModel):
-    message: str = Field(min_length=1, example="What should I do on my farm today?")
+    message: str = Field(min_length=1, max_length=MAX_MESSAGE_CHARACTERS, example="What should I do on my farm today?")
     conversation_id: Optional[str] = None
     language: Optional[str] = Field(default="en", example="en")
 
@@ -40,28 +42,129 @@ class ToolListResponse(BaseModel):
     tools: List[Dict[str, Any]]
 
 
-@router.post("", response_model=APIResponse[AskResponsePayload])
+class ConversationHistoryResponse(BaseModel):
+    conversation_id: str
+    total_messages: int
+    messages: List[Dict[str, Any]]
+
+
+class AskStatsResponse(BaseModel):
+    cache_stats: Dict[str, Any]
+    active_sessions: int
+    rate_limiting_enabled: bool = True
+
+
+@router.post("", response_model=APIResponse[AskResponsePayload], dependencies=[Depends(check_ask_rate_limit)])
 async def ask_villagenova(
     payload: AskRequestPayload,
     current_user: AuthenticatedResident = Depends(get_current_user),
     db: AsyncSession = Depends(get_db)
 ):
     """
-    Main conversational AI endpoint:
-    1. Loads full resident context (crops, soil, stage, weather)
-    2. Runs AI Orchestrator with contextual tool capabilities
-    3. Produces structured action card payload for Flutter UI
+    Main conversational AI endpoint (Week 10 Hardened):
+    1. Enforces character bounds (max 1000 chars) and sliding-window rate limits (429 Too Many Requests).
+    2. Retrieves or provisions conversational session tracking.
+    3. Checks sub-50ms semantic query cache.
+    4. Runs grounded Gemini 3.8 Flash / agronomic rule engine with verified citations.
+    5. Appends turn to conversation history and enforces sliding-window truncation.
     """
+    # 1. Message Validation
+    conversation_manager.validate_message(payload.message)
+
+    # 2. Context Building & Session Provisions
     context = await build_resident_context(current_user.user_id, db)
     if payload.language:
         context["language"] = payload.language
 
+    session = conversation_manager.get_or_create_session(
+        conversation_id=payload.conversation_id,
+        user_id=current_user.user_id
+    )
+
+    # 3. Query Processing with Latency & Cache Tracking
     ai_response = await orchestrator.process_query(
         resident_context=context,
-        user_message=payload.message
+        user_message=payload.message,
+        conversation_id=session.session_id
+    )
+
+    # 4. Record Conversation Turn
+    conversation_manager.add_turn(
+        conversation_id=session.session_id,
+        user_id=current_user.user_id,
+        user_message=payload.message,
+        model_response=ai_response.message,
+        actions=[a.model_dump() for a in ai_response.actions],
+        sources=[s.model_dump() for s in ai_response.sources],
+        why_advisory=ai_response.why_advisory
     )
 
     return APIResponse(data=ai_response)
+
+
+@router.get("/conversations/{conversation_id}", response_model=APIResponse[ConversationHistoryResponse])
+async def get_conversation_history(
+    conversation_id: str,
+    current_user: AuthenticatedResident = Depends(get_current_user)
+):
+    """
+    Fetches full message history for a resident conversation session.
+    """
+    messages = conversation_manager.get_session_history(
+        conversation_id=conversation_id,
+        user_id=current_user.user_id
+    )
+    return APIResponse(
+        data=ConversationHistoryResponse(
+            conversation_id=conversation_id,
+            total_messages=len(messages),
+            messages=messages
+        )
+    )
+
+
+@router.delete("/conversations/{conversation_id}", response_model=APIResponse[Dict[str, Any]])
+async def clear_conversation(
+    conversation_id: str,
+    current_user: AuthenticatedResident = Depends(get_current_user)
+):
+    """
+    Clears message history for a conversation session ("Clear Chat").
+    """
+    cleared = conversation_manager.clear_session(
+        conversation_id=conversation_id,
+        user_id=current_user.user_id
+    )
+    if not cleared:
+        raise HTTPException(
+            status_code=status.HTTP_404_NOT_FOUND,
+            detail="Conversation session not found or unauthorized."
+        )
+    return APIResponse(
+        data={
+            "conversation_id": conversation_id,
+            "status": "cleared",
+            "message": "Conversation history cleared successfully."
+        }
+    )
+
+
+@router.get("/stats", response_model=APIResponse[AskStatsResponse])
+async def get_orchestrator_stats(
+    current_user: AuthenticatedResident = Depends(get_current_user)
+):
+    """
+    Telemetry introspection returning semantic cache hit ratio and session counts.
+    """
+    stats = semantic_cache.get_stats()
+    session_count = conversation_manager.get_all_sessions_count()
+    return APIResponse(
+        data=AskStatsResponse(
+            cache_stats=stats,
+            active_sessions=session_count,
+            rate_limiting_enabled=True
+        )
+    )
 
 
 @router.get("/tools", response_model=APIResponse[ToolListResponse])
