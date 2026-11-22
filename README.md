@@ -609,11 +609,15 @@ Every feature across all 25 weeks must satisfy the **Rule of Five** before it is
 
 ---
 
-## 👥 Team Contact & Roles Directory
-* **Product & Architecture Lead:** Project Coordinator
-* **Team A (Mobile / UI):** Flutter, Riverpod, Google Stitch integration
-* **Team B (Backend / API):** Python 3.12, FastAPI, SQLAlchemy, Alembic
-* **Team C (AI Intelligence):** Gemini API, Function Calling, Prompt Engineering, RAG
-* **Team D (Data, Infra & Integrations):** Supabase, PostgreSQL, pgvector, External APIs, DevOps
+## 👥 10. Team Organization & Engineering Roster
+
+| Team | Focus Area | Members | Core Tech Stack | Git Branch | Member Profiles & Responsibilities |
+|---|---|---|---|---|---|
+| **TEAM A** | **Mobile / UI** | **Ashrith**, **Reshma** | Flutter, Riverpod, go_router, Google Stitch | `frontend/flutter-mobile` | • **Ashrith** (Gaming background): Interaction instincts, UI fluidity, micro-interactions, responsive Stitch card layouts.<br>• **Reshma** (AI background): Screen-to-AI state wiring, conversational UI cards, progressive onboarding, and offline fallback rendering. |
+| **TEAM B** | **Backend / API** | **Sushwanth**, **Rabbani** | Python 3.12, FastAPI, SQLAlchemy, Alembic | `backend/fastapi-api` | • **Sushwanth & Rabbani** (AI background): Core API gateway, JWT auth, schema migrations, business logic services, rate limiting, and orchestration endpoints. |
+| **TEAM C** | **AI Intelligence** | **Nehith** *(supported by Team B)* | Gemini 3.8 Flash, GenAI SDK, Function Calling, RAG | `ai/agent-orchestration` | • **Nehith** (AI background): Prompt engineering, dynamic agent dispatcher, knowledge grounding guardrails, response brevity, and AI safety evaluations. |
+| **TEAM D** | **Data, Infra & Security** | **Sahasra** | Supabase, PostgreSQL, pgvector, External APIs, DevOps, Security | `database/supabase-infra`<br>`integrations/external-apis` | • **Sahasra** (Cybersecurity background): Row Level Security (RLS) policies, penetration testing, security auditing, CI/CD GitHub Actions pipelines, and cloud database infrastructure. |
+
+> **Dynamic Cross-Team Collaboration:** Teams rebalance dynamically across roadmap phases as workload shifts. Team B actively co-engineers with Team C during AI-heavy milestones (such as Phase 3 Orchestrator & Knowledge Retrieval), while Team A and Team D collaborate on web portals and mobile offline cache sync.
 
 *Built with passion for rural communities worldwide.*
