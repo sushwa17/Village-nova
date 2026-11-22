@@ -6,10 +6,9 @@ over official agricultural university (PJTSAU, ICAR) and government scheme gazet
 """
 
 from typing import Dict, Any, List, Optional
-from pydantic import BaseModel, Field
+from pydantic import BaseModel
 import math
 import re
-import datetime
 import logging
 
 logger = logging.getLogger(__name__)
@@ -205,7 +204,6 @@ class KnowledgeRetrievalService:
             raw_score = _cosine_similarity(query_vec, doc_vec)
 
             # Extra weight if keyword appears directly in title or text
-            query_lower = query.lower()
             if any(t in item["chunk_text"].lower() for t in query_tokens):
                 raw_score += 0.20
             if any(t in item["document_title"].lower() for t in query_tokens):

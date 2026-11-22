@@ -9,7 +9,7 @@ from typing import Dict, Any, List, Callable, Optional
 import time
 import inspect
 import logging
-from pydantic import BaseModel, Field
+from pydantic import BaseModel
 
 from app.agents.tools import TOOL_MANIFEST
 

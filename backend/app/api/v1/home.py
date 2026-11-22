@@ -7,8 +7,7 @@ import uuid
 from app.core.database import get_db
 from app.core.security import get_current_user, AuthenticatedResident
 from app.models.resident import ResidentProfile
-from app.models.farm import Farm, Crop
-from app.models.task import Task
+from app.models.farm import Farm
 from app.schemas.home import HomeDashboardPayload, WeatherSummary, TodayActionItem, ProgressSummary
 from app.schemas.common import APIResponse
 

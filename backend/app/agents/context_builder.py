@@ -6,7 +6,7 @@ import uuid
 import logging
 
 from app.models.resident import ResidentProfile
-from app.models.farm import Farm, Crop
+from app.models.farm import Farm
 
 logger = logging.getLogger(__name__)
 

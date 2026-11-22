@@ -1,15 +1,14 @@
-from fastapi import APIRouter, Depends, HTTPException, status
+from fastapi import APIRouter, Depends, status
 from sqlalchemy.ext.asyncio import AsyncSession
 from sqlalchemy.future import select
 from sqlalchemy.orm import selectinload
-from typing import List, Optional
+from typing import List
 from datetime import datetime, date, timedelta
 import uuid
 
 from app.core.database import get_db
 from app.core.security import get_current_user, AuthenticatedResident
-from app.models.resident import ResidentProfile
-from app.models.farm import Farm, Crop, CropActivity, FarmExpense, CropObservation
+from app.models.farm import Farm, Crop, CropActivity, FarmExpense
 from app.schemas.farm import (
     MyFarmOut,
     CropDetailOut,

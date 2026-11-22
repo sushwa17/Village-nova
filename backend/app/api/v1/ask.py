@@ -9,7 +9,7 @@ from app.agents.context_builder import build_resident_context
 from app.agents.orchestrator import orchestrator, AskResponsePayload
 from app.agents.dispatcher import dispatcher
 from app.schemas.common import APIResponse
-from app.services.cache import semantic_cache, rate_limiter, check_ask_rate_limit
+from app.services.cache import semantic_cache, check_ask_rate_limit
 from app.services.conversation import conversation_manager, MAX_MESSAGE_CHARACTERS
 
 router = APIRouter(prefix="/ask", tags=["Ask VillageNova AI"])

@@ -5,7 +5,7 @@ import uuid
 from app.main import app
 from app.core.security import get_current_user, AuthenticatedResident
 from app.core.database import get_db
-from app.agents.dispatcher import dispatcher, ToolDispatcher
+from app.agents.dispatcher import dispatcher
 
 MOCK_USER_ID = str(uuid.uuid4())
 

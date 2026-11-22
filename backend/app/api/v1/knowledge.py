@@ -1,9 +1,7 @@
-from fastapi import APIRouter, Depends, Query
+from fastapi import APIRouter, Depends
 from pydantic import BaseModel, Field
 from typing import Optional, List, Dict, Any
-from sqlalchemy.ext.asyncio import AsyncSession
 
-from app.core.database import get_db
 from app.core.security import get_current_user, AuthenticatedResident
 from app.schemas.common import APIResponse
 from app.services.knowledge import (

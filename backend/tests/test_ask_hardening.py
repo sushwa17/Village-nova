@@ -17,7 +17,7 @@ from app.main import app
 from app.core.security import get_current_user, AuthenticatedResident
 from app.core.database import get_db
 from app.services.cache import semantic_cache, rate_limiter
-from app.services.conversation import conversation_manager, ConversationSession, ConversationMessage
+from app.services.conversation import ConversationSession, ConversationMessage
 
 MOCK_USER_ID = f"resident_{uuid.uuid4().hex[:8]}"
 

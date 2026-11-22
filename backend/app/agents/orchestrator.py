@@ -9,7 +9,7 @@ import time
 
 from app.core.config import settings
 from app.agents.dispatcher import ToolDispatcher
-from app.services.knowledge import knowledge_service, KnowledgeSearchResult
+from app.services.knowledge import knowledge_service
 from app.services.cache import semantic_cache
 
 logger = logging.getLogger(__name__)
