@@ -165,3 +165,120 @@ class MyFarmModel {
     );
   }
 }
+
+class CropLifecycleRiskModel {
+  final String riskTitle;
+  final String severity;
+  final String mitigation;
+  final String affectedOrgan;
+
+  const CropLifecycleRiskModel({
+    required this.riskTitle,
+    required this.severity,
+    required this.mitigation,
+    required this.affectedOrgan,
+  });
+
+  factory CropLifecycleRiskModel.fromJson(Map<String, dynamic> json) {
+    return CropLifecycleRiskModel(
+      riskTitle: json['risk_title'] as String? ?? '',
+      severity: json['severity'] as String? ?? 'low',
+      mitigation: json['mitigation'] as String? ?? '',
+      affectedOrgan: json['affected_organ'] as String? ?? 'leaf',
+    );
+  }
+}
+
+class CropStageRecommendationModel {
+  final String category;
+  final String title;
+  final String guidance;
+  final String source;
+
+  const CropStageRecommendationModel({
+    required this.category,
+    required this.title,
+    required this.guidance,
+    required this.source,
+  });
+
+  factory CropStageRecommendationModel.fromJson(Map<String, dynamic> json) {
+    return CropStageRecommendationModel(
+      category: json['category'] as String? ?? 'cultural',
+      title: json['title'] as String? ?? '',
+      guidance: json['guidance'] as String? ?? '',
+      source: json['source'] as String? ?? 'PJTSAU 2026 Package of Practices',
+    );
+  }
+}
+
+class CropLifecycleModel {
+  final String cropName;
+  final String variety;
+  final String sowingDate;
+  final int daysSinceSowing;
+  final String currentStage;
+  final String stageTitle;
+  final String stageDaysRange;
+  final int stageProgressPct;
+  final int daysInCurrentStage;
+  final int daysRemainingInStage;
+  final int daysToHarvest;
+  final String? farmingGoal;
+  final List<CropStageStepModel> stages;
+  final List<CropLifecycleRiskModel> activeRisks;
+  final List<CropStageRecommendationModel> recommendations;
+  final List<String> priorityActions;
+
+  const CropLifecycleModel({
+    required this.cropName,
+    required this.variety,
+    required this.sowingDate,
+    required this.daysSinceSowing,
+    required this.currentStage,
+    required this.stageTitle,
+    required this.stageDaysRange,
+    required this.stageProgressPct,
+    required this.daysInCurrentStage,
+    required this.daysRemainingInStage,
+    required this.daysToHarvest,
+    this.farmingGoal,
+    required this.stages,
+    required this.activeRisks,
+    required this.recommendations,
+    required this.priorityActions,
+  });
+
+  factory CropLifecycleModel.fromJson(Map<String, dynamic> json) {
+    return CropLifecycleModel(
+      cropName: json['crop_name'] as String? ?? 'Soybean',
+      variety: json['variety'] as String? ?? 'JS 335',
+      sowingDate: json['sowing_date'] as String? ?? '',
+      daysSinceSowing: json['days_since_sowing'] as int? ?? 0,
+      currentStage: json['current_stage'] as String? ?? 'vegetative',
+      stageTitle: json['stage_title'] as String? ?? '',
+      stageDaysRange: json['stage_days_range'] as String? ?? '',
+      stageProgressPct: json['stage_progress_pct'] as int? ?? 0,
+      daysInCurrentStage: json['days_in_current_stage'] as int? ?? 0,
+      daysRemainingInStage: json['days_remaining_in_stage'] as int? ?? 0,
+      daysToHarvest: json['days_to_harvest'] as int? ?? 0,
+      farmingGoal: json['farming_goal'] as String?,
+      stages: (json['stages'] as List<dynamic>?)
+              ?.map((e) => CropStageStepModel.fromJson(e as Map<String, dynamic>))
+              .toList() ??
+          [],
+      activeRisks: (json['active_risks'] as List<dynamic>?)
+              ?.map((e) => CropLifecycleRiskModel.fromJson(e as Map<String, dynamic>))
+              .toList() ??
+          [],
+      recommendations: (json['recommendations'] as List<dynamic>?)
+              ?.map((e) => CropStageRecommendationModel.fromJson(e as Map<String, dynamic>))
+              .toList() ??
+          [],
+      priorityActions: (json['priority_actions'] as List<dynamic>?)
+              ?.map((e) => e.toString())
+              .toList() ??
+          [],
+    );
+  }
+}

@@ -3,7 +3,7 @@ from sqlalchemy.ext.asyncio import AsyncSession
 from sqlalchemy.future import select
 from sqlalchemy import delete
 from sqlalchemy.orm import selectinload
-from datetime import datetime, date, timedelta
+from datetime import datetime, timezone, date, timedelta
 import uuid
 import logging
 
@@ -42,7 +42,7 @@ async def get_my_profile(
                 preferred_language="te",
                 verified_badge=True,
                 roles=["farmer"],
-                created_at=datetime.utcnow()
+                created_at=datetime.now(timezone.utc)
             )
         )
 
@@ -109,7 +109,7 @@ async def complete_onboarding(
                 preferred_language=payload.preferred_language,
                 verified_badge=False,
                 roles=payload.roles,
-                created_at=datetime.utcnow()
+                created_at=datetime.now(timezone.utc)
             )
         )
 

@@ -1,24 +1,24 @@
-from pydantic import BaseModel, Field
+from pydantic import BaseModel, Field, ConfigDict
 from typing import List, Optional
 from uuid import UUID
 from datetime import datetime, date
 
 
 class CropActivityCreate(BaseModel):
-    activity_type: str  # irrigation, fertilizer, pesticide, weeding, soil_check
+    activity_type: str  # irrigation, fertilizer, pesticide, weeding, soil_check, scouting, harvesting
     description: Optional[str] = None
     cost_incurred: float = 0.0
+    performed_at: Optional[datetime] = None
 
 
 class CropActivityOut(BaseModel):
+    model_config = ConfigDict(from_attributes=True)
+
     id: UUID
     activity_type: str
     description: Optional[str] = None
     cost_incurred: float = 0.0
     performed_at: datetime
-
-    class Config:
-        from_attributes = True
 
 
 class FarmExpenseCreate(BaseModel):
@@ -29,14 +29,13 @@ class FarmExpenseCreate(BaseModel):
 
 
 class FarmExpenseOut(BaseModel):
+    model_config = ConfigDict(from_attributes=True)
+
     id: UUID
     category: str
     amount: float
     expense_date: date
     notes: Optional[str] = None
-
-    class Config:
-        from_attributes = True
 
 
 class CropObservationCreate(BaseModel):
@@ -46,15 +45,14 @@ class CropObservationCreate(BaseModel):
 
 
 class CropObservationOut(BaseModel):
+    model_config = ConfigDict(from_attributes=True)
+
     id: UUID
     observation_text: str
     photo_url: Optional[str] = None
     ai_diagnosis_summary: Optional[str] = None
     severity_level: str = "mild"
     logged_at: datetime
-
-    class Config:
-        from_attributes = True
 
 
 class CropStageStep(BaseModel):
@@ -63,9 +61,55 @@ class CropStageStep(BaseModel):
     days_range: str
     is_completed: bool
     is_current: bool
+    description: Optional[str] = None
+
+
+class CropLifecycleRisk(BaseModel):
+    risk_title: str
+    severity: str  # low, moderate, high, critical
+    mitigation: str
+    affected_organ: str  # leaf, root, flower, pod, soil
+
+
+class CropStageRecommendation(BaseModel):
+    category: str  # irrigation, nutrient, pest_management, cultural
+    recommendation: str
+    urgency: str  # immediate, planned, optional
+    source: str = "PJTSAU Package of Practices 2026"
+
+
+class CropLifecycleOut(BaseModel):
+    model_config = ConfigDict(from_attributes=True)
+
+    crop_name: str
+    variety: Optional[str] = None
+    sowing_date: date
+    days_since_sowing: int
+    current_stage_key: str
+    current_stage_title: str
+    stage_days_range: str
+    days_in_current_stage: int
+    days_remaining_in_stage: int
+    stage_progress_pct: int
+    overall_progress_pct: int
+    expected_harvest_date: date
+    days_to_harvest: int
+    farming_goal: Optional[str] = None
+    active_risks: List[CropLifecycleRisk] = Field(default_factory=list)
+    stage_recommendations: List[CropStageRecommendation] = Field(default_factory=list)
+    daily_priority_actions: List[str] = Field(default_factory=list)
+    stages: List[CropStageStep] = Field(default_factory=list)
+
+    # Convenience aliases for frontend and tests
+    current_stage: Optional[str] = None
+    stage_title: Optional[str] = None
+    recommendations: List[CropStageRecommendation] = Field(default_factory=list)
+    priority_actions: List[str] = Field(default_factory=list)
 
 
 class CropDetailOut(BaseModel):
+    model_config = ConfigDict(from_attributes=True)
+
     id: UUID
     crop_name: str
     variety: Optional[str] = None
@@ -76,11 +120,10 @@ class CropDetailOut(BaseModel):
     farming_goal: Optional[str] = None
     stages: List[CropStageStep] = Field(default_factory=list)
 
-    class Config:
-        from_attributes = True
-
 
 class MyFarmOut(BaseModel):
+    model_config = ConfigDict(from_attributes=True)
+
     farm_id: UUID
     farm_name: str
     land_acres: float

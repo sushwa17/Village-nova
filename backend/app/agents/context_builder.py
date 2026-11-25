@@ -2,11 +2,13 @@ from typing import Dict, Any, Optional
 from sqlalchemy.ext.asyncio import AsyncSession
 from sqlalchemy.future import select
 from sqlalchemy.orm import selectinload
+from datetime import date
 import uuid
 import logging
 
 from app.models.resident import ResidentProfile
 from app.models.farm import Farm
+from app.services.lifecycle import calculate_crop_lifecycle
 
 logger = logging.getLogger(__name__)
 
@@ -14,7 +16,8 @@ logger = logging.getLogger(__name__)
 async def build_resident_context(resident_id: str, db: Optional[AsyncSession] = None) -> Dict[str, Any]:
     """
     Assembles real-time contextual snapshot for the AI Orchestrator:
-    Resident Name, Location, Roles, Primary Farm, Active Crop, Sowing Date, Stage.
+    Resident Name, Location, Roles, Primary Farm, Active Crop, Phenological Stage,
+    Days Elapsed, Harvest Horizon, and Active Weather Advisory.
     Gracefully falls back to baseline defaults if DB is offline or mock.
     """
     default_context = {
@@ -24,7 +27,16 @@ async def build_resident_context(resident_id: str, db: Optional[AsyncSession] = 
         "language": "te",
         "roles": ["farmer"],
         "farm": {"land_acres": 2.5, "soil_type": "black", "water_source": "borewell"},
-        "crop": {"crop_name": "Soybean", "current_stage": "vegetative", "sowing_date": "2024-06-15"},
+        "crop": {
+            "crop_name": "Soybean",
+            "variety": "JS 335 (Certified High Yield)",
+            "current_stage": "vegetative",
+            "stage_title": "Vegetative & Branching",
+            "sowing_date": "2024-06-15",
+            "days_since_sowing": 42,
+            "days_to_harvest": 73,
+            "farming_goal": "Maximize Soybean grain yield with timely pest prevention",
+        },
         "weather_advisory": "14mm rainfall forecast at 6:00 PM today"
     }
 
@@ -63,10 +75,24 @@ async def build_resident_context(resident_id: str, db: Optional[AsyncSession] = 
             }
             if primary_farm.crops:
                 active_crop = primary_farm.crops[0]
+                sow_date = active_crop.sowing_date
+                days_elapsed = max(1, (date.today() - sow_date).days) if sow_date else 42
+                lifecycle = calculate_crop_lifecycle(
+                    crop_name=active_crop.crop_name,
+                    days_elapsed=days_elapsed,
+                    variety=active_crop.variety or "JS 335",
+                    sowing_date=sow_date or date.today(),
+                    farming_goal=active_crop.farming_goal,
+                )
                 crop_info = {
-                    "crop_name": active_crop.crop_name,
-                    "current_stage": active_crop.current_stage,
-                    "sowing_date": str(active_crop.sowing_date)
+                    "crop_name": lifecycle.crop_name,
+                    "variety": lifecycle.variety,
+                    "current_stage": lifecycle.current_stage,
+                    "stage_title": lifecycle.stage_title,
+                    "sowing_date": str(lifecycle.sowing_date),
+                    "days_since_sowing": lifecycle.days_since_sowing,
+                    "days_to_harvest": lifecycle.days_to_harvest,
+                    "farming_goal": lifecycle.farming_goal,
                 }
 
         return {

@@ -1,15 +1,19 @@
 from typing import Generic, TypeVar, Optional, Any
 from pydantic import BaseModel, Field
-from datetime import datetime
+from datetime import datetime, timezone
 
 T = TypeVar("T")
+
+
+def _utc_now() -> datetime:
+    return datetime.now(timezone.utc)
 
 
 class APIResponse(BaseModel, Generic[T]):
     success: bool = True
     message: Optional[str] = None
     data: Optional[T] = None
-    timestamp: datetime = Field(default_factory=datetime.utcnow)
+    timestamp: datetime = Field(default_factory=_utc_now)
 
 
 class ErrorDetail(BaseModel):
@@ -21,11 +25,11 @@ class ErrorDetail(BaseModel):
 class APIErrorResponse(BaseModel):
     success: bool = False
     error: ErrorDetail
-    timestamp: datetime = Field(default_factory=datetime.utcnow)
+    timestamp: datetime = Field(default_factory=_utc_now)
 
 
 class HealthCheckResponse(BaseModel):
     status: str = "healthy"
     version: str
     environment: str
-    timestamp: datetime = Field(default_factory=datetime.utcnow)
+    timestamp: datetime = Field(default_factory=_utc_now)

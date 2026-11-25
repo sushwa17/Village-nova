@@ -1,9 +1,9 @@
-from fastapi import APIRouter, Depends, status
+from fastapi import APIRouter, Depends, Query, status
 from sqlalchemy.ext.asyncio import AsyncSession
 from sqlalchemy.future import select
 from sqlalchemy.orm import selectinload
-from typing import List
-from datetime import datetime, date, timedelta
+from typing import List, Optional
+from datetime import datetime, timezone, date, timedelta
 import uuid
 
 from app.core.database import get_db
@@ -19,8 +19,10 @@ from app.schemas.farm import (
     FarmExpenseOut,
     CropObservationCreate,
     CropObservationOut,
+    CropLifecycleOut,
 )
 from app.schemas.common import APIResponse
+from app.services.lifecycle import calculate_crop_lifecycle
 
 router = APIRouter(prefix="/farm", tags=["Farm & Crop Lifecycle"])
 
@@ -29,42 +31,8 @@ def _calculate_stages(crop_name: str, days_elapsed: int) -> tuple[str, int, List
     """
     Computes standard agronomic stages and progress percentage for Kharif crops like Soybean/Cotton.
     """
-    stage_definitions = [
-        ("sowing", "Sowing & Seeding", "Day 1-5", 5),
-        ("germination", "Germination & Emergence", "Day 6-12", 12),
-        ("vegetative", "Vegetative & Branching", "Day 13-55", 55),
-        ("flowering", "Flowering & Blossom", "Day 56-75", 75),
-        ("pod_formation", "Pod Formation & Grain Fill", "Day 76-95", 95),
-        ("harvest", "Maturity & Harvest", "Day 96-115", 115),
-    ]
-
-    current_stage = "vegetative"
-    stage_progress = 38
-    steps: List[CropStageStep] = []
-
-    for key, title, days_range, end_day in stage_definitions:
-        is_completed = days_elapsed > end_day
-        is_current = False
-
-        if not is_completed and not any(s.is_current for s in steps):
-            is_current = True
-            current_stage = key
-
-        steps.append(
-            CropStageStep(
-                stage_key=key,
-                title=title,
-                days_range=days_range,
-                is_completed=is_completed,
-                is_current=is_current,
-            )
-        )
-
-    # Calculate overall crop completion percentage (capped at 100)
-    total_crop_days = 115
-    stage_progress = min(100, max(5, int((days_elapsed / total_crop_days) * 100)))
-
-    return current_stage, stage_progress, steps
+    lifecycle = calculate_crop_lifecycle(crop_name, days_elapsed)
+    return lifecycle.current_stage, lifecycle.stage_progress_pct, lifecycle.stages
 
 
 @router.get("/my-farm", response_model=APIResponse[MyFarmOut])
@@ -92,6 +60,8 @@ async def get_my_farm(
         except Exception:
             farm = None
 
+    now = datetime.now(timezone.utc)
+
     if not farm:
         # Fallback simulated farm (Day 42 Vegetative Stage)
         sow_date = date.today() - timedelta(days=42)
@@ -113,14 +83,14 @@ async def get_my_farm(
                 activity_type="irrigation",
                 description="Borewell channel irrigation before sunny interval",
                 cost_incurred=0.0,
-                performed_at=datetime.utcnow() - timedelta(days=2),
+                performed_at=now - timedelta(days=2),
             ),
             CropActivityOut(
                 id=uuid.UUID("22222222-2222-2222-2222-222222222222"),
                 activity_type="fertilizer",
                 description="Applied DAP (18-46-0) split basal dose",
                 cost_incurred=1450.0,
-                performed_at=datetime.utcnow() - timedelta(days=8),
+                performed_at=now - timedelta(days=8),
             ),
         ]
         demo_expenses = [
@@ -201,6 +171,134 @@ async def get_my_farm(
     )
 
 
+@router.get("/lifecycle", response_model=APIResponse[CropLifecycleOut])
+async def get_crop_lifecycle_endpoint(
+    days_elapsed: Optional[int] = Query(None, description="Optional override to simulate lifecycle stage"),
+    current_user: AuthenticatedResident = Depends(get_current_user),
+    db: AsyncSession = Depends(get_db)
+):
+    """
+    Returns the comprehensive phenological crop lifecycle progression, active PJTSAU agronomic recommendations,
+    active disease/weather risks, and daily priority actions. Supports ?days_elapsed=<int> simulation.
+    """
+    crop_name = "Soybean"
+    variety = "JS 335 (High Oil Yield)"
+    farming_goal = "Maximize Soybean grain yield with timely pest prevention"
+    sow_date = None
+    actual_days = None
+
+    if db:
+        try:
+            user_uuid = uuid.UUID(current_user.user_id)
+            stmt = select(Crop).join(Farm).where(Farm.resident_id == user_uuid)
+            res = await db.execute(stmt)
+            crop = res.scalars().first()
+            if crop:
+                crop_name = crop.crop_name or crop_name
+                variety = crop.variety or variety
+                farming_goal = crop.farming_goal or farming_goal
+                sow_date = crop.sowing_date
+                if sow_date:
+                    actual_days = max(1, (date.today() - sow_date).days)
+        except Exception:
+            pass
+
+    if days_elapsed is not None:
+        effective_days = max(1, days_elapsed)
+    elif actual_days is not None:
+        effective_days = actual_days
+    else:
+        effective_days = 42  # default simulated day (Vegetative)
+
+    effective_sow_date = sow_date or (date.today() - timedelta(days=effective_days))
+    lifecycle_data = calculate_crop_lifecycle(
+        crop_name=crop_name,
+        days_elapsed=effective_days,
+        variety=variety,
+        sowing_date=effective_sow_date,
+        farming_goal=farming_goal,
+    )
+
+    return APIResponse(
+        message="Crop lifecycle retrieved successfully",
+        data=lifecycle_data,
+    )
+
+
+@router.get("/activities", response_model=APIResponse[List[CropActivityOut]])
+async def get_farm_activities(
+    activity_type: Optional[str] = Query(None, description="Filter by activity type"),
+    limit: int = Query(20, le=100, description="Max activities to return"),
+    current_user: AuthenticatedResident = Depends(get_current_user),
+    db: AsyncSession = Depends(get_db)
+):
+    """
+    Returns logged farm activities for the resident's primary crop.
+    """
+    activities: List[CropActivityOut] = []
+    if db:
+        try:
+            user_uuid = uuid.UUID(current_user.user_id)
+            stmt = (
+                select(CropActivity)
+                .join(Crop)
+                .join(Farm)
+                .where(Farm.resident_id == user_uuid)
+            )
+            if activity_type:
+                stmt = stmt.where(CropActivity.activity_type == activity_type)
+            stmt = stmt.order_by(CropActivity.performed_at.desc()).limit(limit)
+            res = await db.execute(stmt)
+            rows = res.scalars().all()
+            for r in rows:
+                activities.append(
+                    CropActivityOut(
+                        id=r.id,
+                        activity_type=r.activity_type,
+                        description=r.description,
+                        cost_incurred=float(r.cost_incurred or 0.0),
+                        performed_at=r.performed_at,
+                    )
+                )
+        except Exception:
+            pass
+
+    if not activities:
+        # Fallback simulated activities
+        now = datetime.now(timezone.utc)
+        simulated = [
+            CropActivityOut(
+                id=uuid.UUID("22222222-2222-2222-2222-222222222221"),
+                activity_type="irrigation",
+                description="Borewell channel irrigation before sunny interval",
+                cost_incurred=0.0,
+                performed_at=now - timedelta(days=2),
+            ),
+            CropActivityOut(
+                id=uuid.UUID("22222222-2222-2222-2222-222222222222"),
+                activity_type="fertilizer",
+                description="Applied DAP (18-46-0) split basal dose",
+                cost_incurred=1450.0,
+                performed_at=now - timedelta(days=8),
+            ),
+            CropActivityOut(
+                id=uuid.UUID("22222222-2222-2222-2222-222222222223"),
+                activity_type="spray",
+                description="Neem oil spray (1500 ppm) for sucking pests prevention",
+                cost_incurred=350.0,
+                performed_at=now - timedelta(days=14),
+            ),
+        ]
+        if activity_type:
+            simulated = [a for a in simulated if a.activity_type == activity_type]
+        activities = simulated[:limit]
+
+    return APIResponse(
+        message="Farm activities retrieved successfully",
+        data=activities,
+    )
+
+
 @router.post("/activities", response_model=APIResponse[CropActivityOut], status_code=status.HTTP_201_CREATED)
 async def log_crop_activity(
     payload: CropActivityCreate,
@@ -211,7 +309,7 @@ async def log_crop_activity(
     Log a field operation (irrigation, fertilizer, spray, weeding, soil inspection).
     """
     activity_id = uuid.uuid4()
-    now = datetime.utcnow()
+    performed_at = payload.performed_at or datetime.now(timezone.utc)
 
     if db:
         try:
@@ -228,7 +326,7 @@ async def log_crop_activity(
                     activity_type=payload.activity_type,
                     description=payload.description,
                     cost_incurred=payload.cost_incurred,
-                    performed_at=now,
+                    performed_at=performed_at,
                 )
                 db.add(new_act)
                 await db.commit()
@@ -242,7 +340,7 @@ async def log_crop_activity(
             activity_type=payload.activity_type,
             description=payload.description,
             cost_incurred=payload.cost_incurred,
-            performed_at=now,
+            performed_at=performed_at,
         ),
     )
 
@@ -254,7 +352,7 @@ async def log_farm_expense(
     db: AsyncSession = Depends(get_db)
 ):
     """
-    Log a farming expenditure (seeds, fertilizer, labor, tractor rental, pesticides).
+    Log a farming expenditure (seeds, fertilizer, labor, machinery, water, other).
     """
     expense_id = uuid.uuid4()
     exp_date = payload.expense_date or date.today()
@@ -302,7 +400,7 @@ async def log_crop_observation(
     Upload an observation or pest photo for AI diagnosis and record keeping.
     """
     obs_id = uuid.uuid4()
-    now = datetime.utcnow()
+    now = datetime.now(timezone.utc)
 
     return APIResponse(
         message="Crop observation recorded successfully",

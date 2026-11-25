@@ -2,7 +2,7 @@ from fastapi import APIRouter, Depends
 from sqlalchemy.ext.asyncio import AsyncSession
 from sqlalchemy.future import select
 from typing import List
-from datetime import datetime
+from datetime import datetime, timezone
 import uuid
 
 from app.core.database import get_db
@@ -92,7 +92,7 @@ async def toggle_task_completion(
 
             if task:
                 task.is_completed = not task.is_completed
-                task.completed_at = datetime.utcnow() if task.is_completed else None
+                task.completed_at = datetime.now(timezone.utc) if task.is_completed else None
                 await db.commit()
                 completed_state = task.is_completed
                 title = task.title
