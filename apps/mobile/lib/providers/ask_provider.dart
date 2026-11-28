@@ -1,5 +1,6 @@
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:villagenova/core/network/api_client.dart';
+import 'package:villagenova/providers/auth_provider.dart';
 
 enum MessageStatus { sent, delivered, pending, failed }
 

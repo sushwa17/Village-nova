@@ -1,6 +1,7 @@
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:villagenova/models/village_feed_model.dart';
 import 'package:villagenova/core/network/api_client.dart';
+import 'package:villagenova/providers/auth_provider.dart';
 
 enum VillageStatus { initial, loading, loaded, error }
 
