@@ -38,10 +38,68 @@ class FarmExpenseOut(BaseModel):
     notes: Optional[str] = None
 
 
+class LeafDiagnosisRemedy(BaseModel):
+    remedy_type: str  # organic, chemical, cultural
+    title: str
+    dosage: str
+    application_method: str
+    safety_note: Optional[str] = None
+
+
+class LeafDoctorCitation(BaseModel):
+    document_title: str
+    authority: str
+    official_url: Optional[str] = None
+    published_date: str = "2026"
+
+
+class LeafDoctorRequest(BaseModel):
+    crop_name: str = "Soybean"
+    symptom_text: str = Field(
+        min_length=3,
+        max_length=1500,
+        description="Farmer description of leaf/pod/stem symptoms",
+    )
+    image_base64: Optional[str] = Field(
+        default=None,
+        description="Optional Base64-encoded leaf photo for multimodal Gemini Vision diagnosis",
+    )
+    image_mime_type: str = "image/jpeg"
+    photo_url: Optional[str] = None
+    affected_organ: Optional[str] = None  # leaf, pod, flower, stem, root
+    severity_hint: Optional[str] = None
+    save_observation: bool = True
+
+
+class LeafDoctorDiagnosisOut(BaseModel):
+    model_config = ConfigDict(from_attributes=True, protected_namespaces=())
+
+    observation_id: UUID
+    crop_name: str
+    crop_stage: str
+    disease_or_pest_name: str
+    scientific_name: Optional[str] = None
+    affected_organ: str = "leaf"
+    severity_level: str  # healthy, mild, moderate, high, critical
+    confidence_score: float = Field(ge=0.0, le=1.0)
+    is_healthy: bool = False
+    summary: str
+    weather_spray_warning: Optional[str] = None
+    organic_remedies: List[LeafDiagnosisRemedy] = Field(default_factory=list)
+    chemical_remedies: List[LeafDiagnosisRemedy] = Field(default_factory=list)
+    preventive_steps: List[str] = Field(default_factory=list)
+    citations: List[LeafDoctorCitation] = Field(default_factory=list)
+    model_used: str = "pjtsau-vision-agronomy-engine"
+    has_image_input: bool = False
+    logged_at: datetime
+
+
 class CropObservationCreate(BaseModel):
     observation_text: str
     photo_url: Optional[str] = None
     severity_level: str = "mild"
+    image_base64: Optional[str] = None
+    crop_name: Optional[str] = None
 
 
 class CropObservationOut(BaseModel):
@@ -53,6 +111,7 @@ class CropObservationOut(BaseModel):
     ai_diagnosis_summary: Optional[str] = None
     severity_level: str = "mild"
     logged_at: datetime
+    diagnosis: Optional[LeafDoctorDiagnosisOut] = None
 
 
 class CropStageStep(BaseModel):

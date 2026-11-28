@@ -282,3 +282,163 @@ class CropLifecycleModel {
     );
   }
 }
+
+class LeafDiagnosisRemedyModel {
+  final String remedyType;
+  final String title;
+  final String dosage;
+  final String applicationMethod;
+  final String? safetyNote;
+
+  const LeafDiagnosisRemedyModel({
+    required this.remedyType,
+    required this.title,
+    required this.dosage,
+    required this.applicationMethod,
+    this.safetyNote,
+  });
+
+  factory LeafDiagnosisRemedyModel.fromJson(Map<String, dynamic> json) {
+    return LeafDiagnosisRemedyModel(
+      remedyType: json['remedy_type'] as String? ?? 'organic',
+      title: json['title'] as String? ?? '',
+      dosage: json['dosage'] as String? ?? '',
+      applicationMethod: json['application_method'] as String? ?? '',
+      safetyNote: json['safety_note'] as String?,
+    );
+  }
+}
+
+class LeafDoctorCitationModel {
+  final String documentTitle;
+  final String authority;
+  final String? officialUrl;
+  final String publishedDate;
+
+  const LeafDoctorCitationModel({
+    required this.documentTitle,
+    required this.authority,
+    this.officialUrl,
+    required this.publishedDate,
+  });
+
+  factory LeafDoctorCitationModel.fromJson(Map<String, dynamic> json) {
+    return LeafDoctorCitationModel(
+      documentTitle: json['document_title'] as String? ?? '',
+      authority: json['authority'] as String? ?? '',
+      officialUrl: json['official_url'] as String?,
+      publishedDate: json['published_date'] as String? ?? '2026',
+    );
+  }
+}
+
+class LeafDoctorDiagnosisModel {
+  final String observationId;
+  final String cropName;
+  final String cropStage;
+  final String diseaseOrPestName;
+  final String? scientificName;
+  final String affectedOrgan;
+  final String severityLevel;
+  final double confidenceScore;
+  final bool isHealthy;
+  final String summary;
+  final String? weatherSprayWarning;
+  final List<LeafDiagnosisRemedyModel> organicRemedies;
+  final List<LeafDiagnosisRemedyModel> chemicalRemedies;
+  final List<String> preventiveSteps;
+  final List<LeafDoctorCitationModel> citations;
+  final String modelUsed;
+  final bool hasImageInput;
+  final String loggedAt;
+
+  const LeafDoctorDiagnosisModel({
+    required this.observationId,
+    required this.cropName,
+    required this.cropStage,
+    required this.diseaseOrPestName,
+    this.scientificName,
+    required this.affectedOrgan,
+    required this.severityLevel,
+    required this.confidenceScore,
+    required this.isHealthy,
+    required this.summary,
+    this.weatherSprayWarning,
+    required this.organicRemedies,
+    required this.chemicalRemedies,
+    required this.preventiveSteps,
+    required this.citations,
+    required this.modelUsed,
+    required this.hasImageInput,
+    required this.loggedAt,
+  });
+
+  factory LeafDoctorDiagnosisModel.fromJson(Map<String, dynamic> json) {
+    return LeafDoctorDiagnosisModel(
+      observationId: json['observation_id'] as String? ?? '',
+      cropName: json['crop_name'] as String? ?? 'Soybean',
+      cropStage: json['crop_stage'] as String? ?? 'vegetative',
+      diseaseOrPestName: json['disease_or_pest_name'] as String? ?? 'Diagnostic Check',
+      scientificName: json['scientific_name'] as String?,
+      affectedOrgan: json['affected_organ'] as String? ?? 'leaf',
+      severityLevel: json['severity_level'] as String? ?? 'mild',
+      confidenceScore: (json['confidence_score'] as num?)?.toDouble() ?? 0.85,
+      isHealthy: json['is_healthy'] as bool? ?? false,
+      summary: json['summary'] as String? ?? '',
+      weatherSprayWarning: json['weather_spray_warning'] as String?,
+      organicRemedies: (json['organic_remedies'] as List<dynamic>?)
+              ?.map((e) => LeafDiagnosisRemedyModel.fromJson(e as Map<String, dynamic>))
+              .toList() ??
+          [],
+      chemicalRemedies: (json['chemical_remedies'] as List<dynamic>?)
+              ?.map((e) => LeafDiagnosisRemedyModel.fromJson(e as Map<String, dynamic>))
+              .toList() ??
+          [],
+      preventiveSteps: (json['preventive_steps'] as List<dynamic>?)
+              ?.map((e) => e.toString())
+              .toList() ??
+          [],
+      citations: (json['citations'] as List<dynamic>?)
+              ?.map((e) => LeafDoctorCitationModel.fromJson(e as Map<String, dynamic>))
+              .toList() ??
+          [],
+      modelUsed: json['model_used'] as String? ?? 'pjtsau-pathology-engine',
+      hasImageInput: json['has_image_input'] as bool? ?? false,
+      loggedAt: json['logged_at'] as String? ?? '',
+    );
+  }
+}
+
+class CropObservationModel {
+  final String id;
+  final String observationText;
+  final String? photoUrl;
+  final String? aiDiagnosisSummary;
+  final String severityLevel;
+  final String loggedAt;
+  final LeafDoctorDiagnosisModel? diagnosis;
+
+  const CropObservationModel({
+    required this.id,
+    required this.observationText,
+    this.photoUrl,
+    this.aiDiagnosisSummary,
+    required this.severityLevel,
+    required this.loggedAt,
+    this.diagnosis,
+  });
+
+  factory CropObservationModel.fromJson(Map<String, dynamic> json) {
+    return CropObservationModel(
+      id: json['id'] as String? ?? '',
+      observationText: json['observation_text'] as String? ?? '',
+      photoUrl: json['photo_url'] as String?,
+      aiDiagnosisSummary: json['ai_diagnosis_summary'] as String?,
+      severityLevel: json['severity_level'] as String? ?? 'mild',
+      loggedAt: json['logged_at'] as String? ?? '',
+      diagnosis: json['diagnosis'] != null
+          ? LeafDoctorDiagnosisModel.fromJson(json['diagnosis'] as Map<String, dynamic>)
+          : null,
+    );
+  }
+}

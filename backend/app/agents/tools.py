@@ -1,9 +1,8 @@
 """
-VillageNova Specialist AI Tools (Phase 3, Week 8)
+VillageNova Specialist AI Tools (Phase 3–4, Week 8–12)
 
 Provides domain-specific tools for agriculture, weather, mandi market intelligence,
-government schemes, and farm task management. These tools can be invoked both by
-Google Gemini Function Calling and by the resilient offline orchestrator.
+Leaf Crop Doctor pathology diagnosis, government schemes, and farm task management.
 """
 
 from typing import Dict, Any, List, Optional
@@ -17,16 +16,7 @@ def get_hyperlocal_weather(village: str = "Ananthagiri", district: str = "Vikara
     """
     Retrieves current weather, 24-hour forecast, and agronomic rain advisories
     for a given village or mandal.
-
-    Args:
-        village: Name of the village or mandal (default: Ananthagiri)
-        district: District name (default: Vikarabad)
-
-    Returns:
-        Dictionary containing temperature, humidity, precipitation probability,
-        rain arrival forecast, and spray hazard advisory.
     """
-    # Open-Meteo & IMD calibrated rural forecast for Vikarabad region (17.33°N, 77.90°E)
     return {
         "location": f"{village}, {district}",
         "current_temp_c": 31.0,
@@ -54,17 +44,9 @@ def get_crop_stage_guidance(
 ) -> Dict[str, Any]:
     """
     Returns agronomic recommendations and alert checklists for a crop's current stage.
-
-    Args:
-        crop_name: Name of the crop (e.g. Soybean, Cotton, Red Gram)
-        stage: Current lifecycle stage (e.g. vegetative, flowering, pod_formation)
-        days_since_sowing: Days elapsed since sowing (default: 42)
-
-    Returns:
-        Guidance on canopy management, pest vulnerability, water requirements, and field chores.
     """
     normalized_crop = crop_name.strip().capitalize()
-    
+
     if normalized_crop == "Soybean":
         return {
             "crop": "Soybean (JS-335)",
@@ -119,16 +101,9 @@ def get_crop_stage_guidance(
 def get_mandi_prices(commodity: str = "Soybean", market: str = "Vikarabad") -> Dict[str, Any]:
     """
     Retrieves live APMC market prices, daily price trends, and arrival volumes.
-
-    Args:
-        commodity: Crop commodity name (default: Soybean)
-        market: APMC mandi name (default: Vikarabad)
-
-    Returns:
-        Market price per quintal, min/max/modal prices, daily change, and arrivals.
     """
     normalized_comm = commodity.strip().capitalize()
-    
+
     rates = {
         "Soybean": {
             "modal_price_per_q": 4850,
@@ -179,7 +154,7 @@ def get_mandi_prices(commodity: str = "Soybean", market: str = "Vikarabad") -> D
         "market_name": f"{market} APMC",
         "nearby_comparison": []
     })
-    
+
     data["source"] = "AGMARKNET - Directorate of Marketing & Inspection (DMI)"
     data["as_of"] = datetime.datetime.now().strftime("%Y-%m-%d 11:30 AM")
     return data
@@ -188,12 +163,6 @@ def get_mandi_prices(commodity: str = "Soybean", market: str = "Vikarabad") -> D
 def get_pending_tasks(user_id: str) -> Dict[str, Any]:
     """
     Fetches the resident farmer's active farm tasks and checklist for the current week.
-
-    Args:
-        user_id: The UUID or ID of the resident
-
-    Returns:
-        List of pending and completed farm activities with stage and due dates.
     """
     return {
         "user_id": user_id,
@@ -244,14 +213,6 @@ def check_scheme_eligibility(
 ) -> Dict[str, Any]:
     """
     Evaluates government financial subsidies and input schemes for which the resident qualifies.
-
-    Args:
-        land_acres: Total cultivated landholding in acres (default: 2.5)
-        crop_name: Current crop cultivated (default: Soybean)
-        village: Village name (default: Ananthagiri)
-
-    Returns:
-        List of eligible schemes, benefits, deadlines, and documentation checklists.
     """
     eligible_schemes = [
         {
@@ -302,15 +263,6 @@ def execute_quick_farm_action(
 ) -> Dict[str, Any]:
     """
     Executes or logs a farm activity, task completion, or financial expense directly.
-
-    Args:
-        user_id: Resident's UUID
-        action_type: Type of action ('check_soil', 'inspect_leaves', 'irrigation', 'expense', 'photo')
-        notes: Context note or description
-        amount: Optional financial cost in Rupees (for expenses)
-
-    Returns:
-        Status confirmation with updated farm records.
     """
     timestamp = datetime.datetime.now().strftime("%Y-%m-%d %H:%M:%S")
     return {
@@ -329,13 +281,6 @@ def search_knowledge_base(query: str, domain: Optional[str] = None) -> Dict[str,
     """
     Searches official agricultural university advisories, ICAR manuals, and government scheme gazettes
     using semantic vector search for verified factual grounding.
-
-    Args:
-        query: Grounding query (e.g. 'whitefly yellow mosaic soybean treatment', 'pm kisan eligibility')
-        domain: Optional filter ('agronomy', 'schemes', 'weather', 'mandi')
-
-    Returns:
-        Ranked official advisory chunks with issuing authorities and official citation links.
     """
     from app.services.knowledge import knowledge_service
     results = knowledge_service.search(query=query, top_k=2, domain=domain)
@@ -344,6 +289,26 @@ def search_knowledge_base(query: str, domain: Optional[str] = None) -> Dict[str,
         "total_results": len(results),
         "results": [r.model_dump() for r in results]
     }
+
+
+def diagnose_crop_leaf(
+    symptom_text: str,
+    crop_name: str = "Soybean",
+    crop_stage: str = "vegetative",
+    image_base64: Optional[str] = None,
+) -> Dict[str, Any]:
+    """
+    Runs the Week 12 Leaf Crop Doctor diagnostic engine across symptoms and optional leaf imagery,
+    returning severity scoring, PJTSAU/ICAR remedies, and IMD rain-fastness spray warnings.
+    """
+    from app.services.leaf_doctor import diagnose_leaf_observation
+    result = diagnose_leaf_observation(
+        symptom_text=symptom_text,
+        crop_name=crop_name,
+        crop_stage=crop_stage,
+        image_base64=image_base64,
+    )
+    return result.model_dump(mode="json")
 
 
 # Tool Declarations Manifest for Gemini and Dispatcher
@@ -441,5 +406,20 @@ TOOL_MANIFEST: List[Dict[str, Any]] = [
             "required": ["query"]
         },
         "callable": search_knowledge_base
+    },
+    {
+        "name": "diagnose_crop_leaf",
+        "description": "Run Leaf Crop Doctor multimodal pathology diagnosis and return PJTSAU/ICAR remedies and IMD spray safety alerts.",
+        "parameters": {
+            "type": "object",
+            "properties": {
+                "symptom_text": {"type": "string", "description": "Observed symptoms on leaves, flowers, or pods"},
+                "crop_name": {"type": "string", "description": "Crop name (e.g. Soybean, Cotton)"},
+                "crop_stage": {"type": "string", "description": "Current phenological stage"},
+                "image_base64": {"type": "string", "description": "Optional base64-encoded photo"}
+            },
+            "required": ["symptom_text"]
+        },
+        "callable": diagnose_crop_leaf
     }
 ]

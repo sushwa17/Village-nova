@@ -75,15 +75,21 @@ class _MySpaceScreenState extends ConsumerState<MySpaceScreen> {
                         const SizedBox(height: 16),
                       ],
 
-                      // 5. Quick Farm Action Buttons
+                      // 5. Latest Leaf Crop Doctor Diagnosis Card (Week 12)
+                      if (farmState.latestDiagnosis != null) ...[
+                        _buildLeafDoctorCard(farmState.latestDiagnosis!),
+                        const SizedBox(height: 16),
+                      ],
+
+                      // 6. Quick Farm Action Buttons
                       _buildQuickActionRow(context),
                       const SizedBox(height: 16),
 
-                      // 6. Recent Activities Log
+                      // 7. Recent Activities Log
                       _buildRecentActivitiesCard(farm),
                       const SizedBox(height: 16),
 
-                      // 7. Expenses & Financial Breakdown
+                      // 8. Expenses & Financial Breakdown
                       _buildFinancialSummaryCard(farm),
                       const SizedBox(height: 32),
                     ] else ...[
@@ -344,9 +350,11 @@ class _MySpaceScreenState extends ConsumerState<MySpaceScreen> {
               children: [
                 const Icon(Icons.track_changes, size: 14, color: AppColors.textMuted),
                 const SizedBox(width: 6),
-                Text(
-                  'Goal: ${crop.farmingGoal}',
-                  style: const TextStyle(fontSize: 12, color: AppColors.textSecondary, fontStyle: FontStyle.italic),
+                Expanded(
+                  child: Text(
+                    'Goal: ${crop.farmingGoal}',
+                    style: const TextStyle(fontSize: 12, color: AppColors.textSecondary, fontStyle: FontStyle.italic),
+                  ),
                 ),
               ],
             ),
@@ -389,7 +397,6 @@ class _MySpaceScreenState extends ConsumerState<MySpaceScreen> {
               child: Row(
                 crossAxisAlignment: CrossAxisAlignment.stretch,
                 children: [
-                  // Indicator column
                   SizedBox(
                     width: 32,
                     child: Column(
@@ -408,7 +415,6 @@ class _MySpaceScreenState extends ConsumerState<MySpaceScreen> {
                     ),
                   ),
                   const SizedBox(width: 10),
-                  // Stage Content
                   Expanded(
                     child: Padding(
                       padding: const EdgeInsets.only(bottom: 16.0),
@@ -468,7 +474,7 @@ class _MySpaceScreenState extends ConsumerState<MySpaceScreen> {
                 ],
               ),
             );
-          }).toList(),
+          }),
         ],
       ),
     );
@@ -518,6 +524,93 @@ class _MySpaceScreenState extends ConsumerState<MySpaceScreen> {
     }
   }
 
+  Widget _buildLeafDoctorCard(LeafDoctorDiagnosisModel diag) {
+    final isDanger = diag.severityLevel == 'high' || diag.severityLevel == 'critical';
+    final bg = diag.isHealthy
+        ? const Color(0xFFF0FDF4)
+        : (isDanger ? const Color(0xFFFEF2F2) : const Color(0xFFFFFBEB));
+    final border = diag.isHealthy
+        ? const Color(0xFFBBF7D0)
+        : (isDanger ? const Color(0xFFFECACA) : const Color(0xFFFDE68A));
+    final badgeColor = diag.isHealthy
+        ? const Color(0xFF15803D)
+        : (isDanger ? const Color(0xFFB91C1C) : const Color(0xFFB45309));
+
+    return StitchCard(
+      backgroundColor: bg,
+      borderColor: border,
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Row(
+            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+            children: [
+              Text(
+                'LEAF CROP DOCTOR • ${(diag.confidenceScore * 100).round()}% CONFIDENCE',
+                style: TextStyle(
+                  fontSize: 11,
+                  fontWeight: FontWeight.w800,
+                  color: badgeColor,
+                  letterSpacing: 0.6,
+                ),
+              ),
+              Container(
+                padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 2),
+                decoration: BoxDecoration(
+                  color: badgeColor,
+                  borderRadius: BorderRadius.circular(10),
+                ),
+                child: Text(
+                  diag.severityLevel.toUpperCase(),
+                  style: const TextStyle(fontSize: 10, fontWeight: FontWeight.w800, color: Colors.white),
+                ),
+              ),
+            ],
+          ),
+          const SizedBox(height: 8),
+          Text(
+            diag.diseaseOrPestName,
+            style: const TextStyle(fontSize: 16, fontWeight: FontWeight.w800, color: AppColors.textPrimary),
+          ),
+          const SizedBox(height: 4),
+          Text(
+            diag.summary,
+            style: const TextStyle(fontSize: 12, color: AppColors.textSecondary, height: 1.35),
+          ),
+          if (diag.weatherSprayWarning != null) ...[
+            const SizedBox(height: 10),
+            Container(
+              padding: const EdgeInsets.all(10),
+              decoration: BoxDecoration(
+                color: Colors.white,
+                borderRadius: BorderRadius.circular(10),
+                border: Border.all(color: const Color(0xFFFCD34D)),
+              ),
+              child: Text(
+                diag.weatherSprayWarning!,
+                style: const TextStyle(fontSize: 11, fontWeight: FontWeight.w700, color: Color(0xFF92400E)),
+              ),
+            ),
+          ],
+          if (diag.organicRemedies.isNotEmpty) ...[
+            const SizedBox(height: 10),
+            Text(
+              'Organic IPM: ${diag.organicRemedies.first.title} (${diag.organicRemedies.first.dosage})',
+              style: const TextStyle(fontSize: 12, fontWeight: FontWeight.w600, color: AppColors.primaryGreenDark),
+            ),
+          ],
+          if (diag.chemicalRemedies.isNotEmpty) ...[
+            const SizedBox(height: 4),
+            Text(
+              'Recommended Dose: ${diag.chemicalRemedies.first.title} (${diag.chemicalRemedies.first.dosage})',
+              style: const TextStyle(fontSize: 12, fontWeight: FontWeight.w600, color: AppColors.textPrimary),
+            ),
+          ],
+        ],
+      ),
+    );
+  }
+
   Widget _buildQuickActionRow(BuildContext context) {
     return Row(
       children: [
@@ -542,7 +635,7 @@ class _MySpaceScreenState extends ConsumerState<MySpaceScreen> {
         Expanded(
           child: _buildActionBtn(
             icon: Icons.camera_alt_outlined,
-            label: '📷 Crop Photo',
+            label: 'Leaf Doctor',
             color: const Color(0xFF2563EB),
             onTap: () => _showLogObservationBottomSheet(context),
           ),
@@ -679,7 +772,7 @@ class _MySpaceScreenState extends ConsumerState<MySpaceScreen> {
                   ],
                 ),
               );
-            }).toList(),
+            }),
         ],
       ),
     );
@@ -756,7 +849,7 @@ class _MySpaceScreenState extends ConsumerState<MySpaceScreen> {
                 ],
               ),
             );
-          }).toList(),
+          }),
         ],
       ),
     );
@@ -861,9 +954,11 @@ class _MySpaceScreenState extends ConsumerState<MySpaceScreen> {
                             description: descController.text.isNotEmpty ? descController.text : '${typeController.text} performed',
                             cost: cost,
                           );
-                      if (context.mounted) {
+                      if (ctx.mounted) {
                         Navigator.pop(ctx);
-                        ScaffoldMessenger.of(context).showSnackBar(
+                      }
+                      if (this.context.mounted) {
+                        ScaffoldMessenger.of(this.context).showSnackBar(
                           SnackBar(content: Text('Activity "${typeController.text}" logged successfully!')),
                         );
                       }
@@ -960,9 +1055,11 @@ class _MySpaceScreenState extends ConsumerState<MySpaceScreen> {
                             amount: amount,
                             notes: notesController.text.isNotEmpty ? notesController.text : null,
                           );
-                      if (context.mounted) {
+                      if (ctx.mounted) {
                         Navigator.pop(ctx);
-                        ScaffoldMessenger.of(context).showSnackBar(
+                      }
+                      if (this.context.mounted) {
+                        ScaffoldMessenger.of(this.context).showSnackBar(
                           SnackBar(content: Text('Expense of ₹$amount recorded!')),
                         );
                       }
@@ -978,8 +1075,10 @@ class _MySpaceScreenState extends ConsumerState<MySpaceScreen> {
   }
 
   void _showLogObservationBottomSheet(BuildContext context) {
-    final noteController = TextEditingController();
-    String healthStatus = 'healthy';
+    final noteController = TextEditingController(
+      text: 'Yellow mosaic mottling on lower leaves with small whiteflies.',
+    );
+    String healthStatus = 'yellowing';
 
     showModalBottomSheet(
       context: context,
@@ -1002,73 +1101,98 @@ class _MySpaceScreenState extends ConsumerState<MySpaceScreen> {
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
                   const Text(
-                    'Crop Observation & Photo',
+                    'AI Leaf Crop Doctor',
                     style: TextStyle(fontSize: 18, fontWeight: FontWeight.w800, color: AppColors.textPrimary),
                   ),
                   const SizedBox(height: 14),
                   Container(
-                    height: 110,
+                    height: 96,
                     width: double.infinity,
                     decoration: BoxDecoration(
                       color: const Color(0xFFF3F4F6),
                       borderRadius: BorderRadius.circular(12),
-                      border: Border.all(color: const Color(0xFFE5E7EB), style: BorderStyle.solid),
+                      border: Border.all(color: const Color(0xFFE5E7EB)),
                     ),
-                    child: Center(
+                    child: const Center(
                       child: Column(
                         mainAxisAlignment: MainAxisAlignment.center,
-                        children: const [
-                          Icon(Icons.camera_alt, size: 32, color: AppColors.textMuted),
-                          SizedBox(height: 6),
-                          Text('Simulate Camera Capture / Photo Upload', style: TextStyle(fontSize: 12, color: AppColors.textSecondary)),
+                        children: [
+                          Icon(Icons.camera_alt, size: 28, color: AppColors.textMuted),
+                          SizedBox(height: 4),
+                          Text(
+                            'Camera Leaf Scan Ready (Soybean JS-335)',
+                            style: TextStyle(fontSize: 12, color: AppColors.textSecondary),
+                          ),
                         ],
                       ),
                     ),
                   ),
                   const SizedBox(height: 14),
-                  const Text('Observed Crop Health', style: TextStyle(fontSize: 13, fontWeight: FontWeight.w600)),
+                  const Text('Observed Symptom Preset', style: TextStyle(fontSize: 13, fontWeight: FontWeight.w600)),
                   const SizedBox(height: 6),
-                  Row(
+                  Wrap(
+                    spacing: 8,
                     children: [
                       ChoiceChip(
-                        label: const Text('🌿 Healthy'),
+                        label: const Text('Healthy'),
                         selected: healthStatus == 'healthy',
                         selectedColor: const Color(0xFFDCFCE7),
-                        onSelected: (val) => setModalState(() => healthStatus = 'healthy'),
+                        onSelected: (val) => setModalState(() {
+                          healthStatus = 'healthy';
+                          noteController.text = 'Healthy dark green leaf canopy with no spots.';
+                        }),
                       ),
-                      const SizedBox(width: 8),
                       ChoiceChip(
-                        label: const Text('🐛 Pest Sign'),
-                        selected: healthStatus == 'pest_detected',
-                        selectedColor: const Color(0xFFFEE2E2),
-                        onSelected: (val) => setModalState(() => healthStatus = 'pest_detected'),
-                      ),
-                      const SizedBox(width: 8),
-                      ChoiceChip(
-                        label: const Text('🍂 Yellowing'),
+                        label: const Text('Yellowing / Whitefly'),
                         selected: healthStatus == 'yellowing',
                         selectedColor: const Color(0xFFFEF3C7),
-                        onSelected: (val) => setModalState(() => healthStatus = 'yellowing'),
+                        onSelected: (val) => setModalState(() {
+                          healthStatus = 'yellowing';
+                          noteController.text = 'Yellow mosaic mottling on lower leaves with small whiteflies.';
+                        }),
+                      ),
+                      ChoiceChip(
+                        label: const Text('Caterpillar Holes'),
+                        selected: healthStatus == 'pest_detected',
+                        selectedColor: const Color(0xFFFEE2E2),
+                        onSelected: (val) => setModalState(() {
+                          healthStatus = 'pest_detected';
+                          noteController.text = 'Chewed leaf margins and caterpillar feeding holes on upper leaves.';
+                        }),
                       ),
                     ],
                   ),
                   const SizedBox(height: 12),
                   TextField(
                     controller: noteController,
+                    maxLines: 2,
                     decoration: const InputDecoration(
-                      labelText: 'Field Observation Note',
-                      hintText: 'e.g. Good canopy formation, no leaf rust observed',
+                      labelText: 'Observed Leaf / Pod Symptoms',
                       border: OutlineInputBorder(),
                     ),
                   ),
                   const SizedBox(height: 18),
                   StitchButton(
-                    text: 'Save Observation',
-                    onPressed: () {
-                      Navigator.pop(ctx);
-                      ScaffoldMessenger.of(context).showSnackBar(
-                        const SnackBar(content: Text('Crop observation saved to timeline!')),
-                      );
+                    text: 'Diagnose with Leaf Doctor',
+                    onPressed: () async {
+                      final diag = await ref.read(farmProvider.notifier).diagnoseLeaf(
+                            symptomText: noteController.text.isNotEmpty
+                                ? noteController.text
+                                : 'Routine canopy inspection',
+                            severityHint: healthStatus,
+                          );
+                      if (ctx.mounted) {
+                        Navigator.pop(ctx);
+                      }
+                      if (this.context.mounted && diag != null) {
+                        ScaffoldMessenger.of(this.context).showSnackBar(
+                          SnackBar(
+                            content: Text(
+                              'Leaf Doctor: ${diag.diseaseOrPestName} (${diag.severityLevel.toUpperCase()})',
+                            ),
+                          ),
+                        );
+                      }
                     },
                   ),
                 ],

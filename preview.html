@@ -944,6 +944,9 @@
             </div>
           </div>
 
+          <!-- Week 12: Latest Leaf Crop Doctor Diagnosis Card -->
+          <div id="leaf-doctor-result-card" class="hidden p-3.5 rounded-2xl border shadow-2xs space-y-2 transition-all"></div>
+
           <!-- Quick Action Buttons -->
           <div class="grid grid-cols-3 gap-2">
             <button onclick="promptLogActivity()" class="p-2.5 bg-white border border-slate-200 rounded-xl flex flex-col items-center text-center hover:border-emerald-500 shadow-2xs active:scale-95 transition-all">
@@ -954,9 +957,9 @@
               <span class="text-base text-amber-600">💰</span>
               <span class="text-[10px] font-bold text-slate-800 mt-1">+ Expense</span>
             </button>
-            <button onclick="promptFieldPhoto()" class="p-2.5 bg-white border border-slate-200 rounded-xl flex flex-col items-center text-center hover:border-emerald-500 shadow-2xs active:scale-95 transition-all">
-              <span class="text-base text-blue-600">📷</span>
-              <span class="text-[10px] font-bold text-slate-800 mt-1">Field Photo</span>
+            <button onclick="promptFieldPhoto()" class="p-2.5 bg-blue-50/70 border border-blue-200 rounded-xl flex flex-col items-center text-center hover:border-blue-500 shadow-2xs active:scale-95 transition-all">
+              <span class="text-base text-blue-600">🔬</span>
+              <span class="text-[10px] font-bold text-blue-900 mt-1">Leaf Doctor</span>
             </button>
           </div>
 
@@ -1852,6 +1855,64 @@
     </div>
   </div>
 
+  <!-- ============================================================ -->
+  <!-- WEEK 12 MULTIMODAL AI LEAF CROP DOCTOR MODAL                -->
+  <!-- ============================================================ -->
+  <div id="leaf-doctor-modal" class="hidden fixed inset-0 z-50 bg-slate-950/80 backdrop-blur-sm flex items-center justify-center p-4">
+    <div class="bg-white text-slate-900 rounded-3xl max-w-lg w-full max-h-[92vh] overflow-y-auto p-5 shadow-2xl border border-slate-200 custom-scrollbar space-y-3.5">
+      <div class="flex items-center justify-between pb-3 border-b border-slate-200">
+        <div class="flex items-center gap-2.5">
+          <div class="w-10 h-10 rounded-2xl bg-emerald-600 text-white flex items-center justify-center text-xl shadow-md shadow-emerald-600/30">🔬</div>
+          <div>
+            <div class="flex items-center gap-2">
+              <h3 class="text-sm font-extrabold text-slate-900">AI Leaf Crop Doctor</h3>
+              <span class="px-2 py-0.5 rounded-full bg-blue-100 text-blue-800 text-[10px] font-extrabold">Week 12 Multimodal</span>
+            </div>
+            <p class="text-[11px] text-slate-500">Gemini Vision + PJTSAU Kharif 2026 &amp; IMD Spray Safety</p>
+          </div>
+        </div>
+        <button onclick="toggleLeafDoctorModal()" class="w-8 h-8 rounded-full bg-slate-100 hover:bg-slate-200 text-slate-600 flex items-center justify-center font-bold text-xs">✕</button>
+      </div>
+
+      <!-- Simulated Leaf Scan Frame -->
+      <div class="p-3 bg-slate-900 rounded-2xl text-white flex items-center justify-between border border-slate-700">
+        <div class="flex items-center gap-3">
+          <div id="leaf-scan-thumb" class="w-14 h-14 rounded-xl bg-amber-500/20 border border-amber-400/50 flex items-center justify-center text-2xl">🍂</div>
+          <div>
+            <p class="text-xs font-extrabold text-emerald-300" id="leaf-scan-label">Captured Frame: Soybean JS-335 (Day 42)</p>
+            <p class="text-[10px] text-slate-300 mt-0.5">Resolution: 1080p Macro • GPS: Ananthagiri, Vikarabad</p>
+          </div>
+        </div>
+        <span class="px-2 py-1 rounded-lg bg-emerald-500/20 text-emerald-300 text-[9px] font-bold border border-emerald-400/30">JPG Attached</span>
+      </div>
+
+      <!-- Preset Selector -->
+      <div class="space-y-1.5">
+        <label class="text-[10px] font-extrabold text-slate-500 uppercase tracking-wider block">Select Sample Leaf Photo / Condition</label>
+        <div class="flex flex-wrap gap-1.5">
+          <button onclick="selectLeafPreset('ymv')" id="preset-ymv" class="leaf-preset-btn px-2.5 py-1.5 rounded-xl text-[11px] font-bold bg-amber-100 text-amber-900 border border-amber-300">🍂 Yellow Mosaic + Whitefly</button>
+          <button onclick="selectLeafPreset('caterpillar')" id="preset-caterpillar" class="leaf-preset-btn px-2.5 py-1.5 rounded-xl text-[11px] font-semibold bg-slate-100 text-slate-700 border border-slate-200">🐛 Spodoptera Holes</button>
+          <button onclick="selectLeafPreset('pod_borer')" id="preset-pod_borer" class="leaf-preset-btn px-2.5 py-1.5 rounded-xl text-[11px] font-semibold bg-slate-100 text-slate-700 border border-slate-200">🫘 Pod Borer Damage</button>
+          <button onclick="selectLeafPreset('rust')" id="preset-rust" class="leaf-preset-btn px-2.5 py-1.5 rounded-xl text-[11px] font-semibold bg-slate-100 text-slate-700 border border-slate-200">🍄 Fungal Rust Pustules</button>
+          <button onclick="selectLeafPreset('healthy')" id="preset-healthy" class="leaf-preset-btn px-2.5 py-1.5 rounded-xl text-[11px] font-semibold bg-slate-100 text-slate-700 border border-slate-200">🌿 Healthy Canopy</button>
+        </div>
+      </div>
+
+      <!-- Farmer Symptom Note -->
+      <div class="space-y-1">
+        <label class="text-[10px] font-extrabold text-slate-500 uppercase tracking-wider block">Farmer Field Observation</label>
+        <textarea id="leaf-symptom-input" rows="2" class="w-full p-2.5 bg-slate-50 border border-slate-200 rounded-xl text-xs text-slate-800 outline-none focus:ring-2 focus:ring-emerald-600">Yellow mosaic mottling on lower leaves with small whiteflies underneath.</textarea>
+      </div>
+
+      <button onclick="runLeafDoctorDiagnosis()" class="w-full py-2.5 bg-emerald-700 hover:bg-emerald-800 text-white font-extrabold text-xs rounded-xl shadow-md transition-all active:scale-[0.98]">
+        🔬 Run Multimodal Diagnosis &amp; Remedies
+      </button>
+
+      <!-- Diagnosis Output Panel -->
+      <div id="leaf-modal-output" class="hidden p-3.5 rounded-2xl border space-y-2 text-xs"></div>
+    </div>
+  </div>
+
   <script>
     // State Router for Mobile Screens
     function setScreen(screenName) {
@@ -2165,29 +2226,161 @@
       expList.appendChild(newRow);
     }
 
-    function promptFieldPhoto() {
-      const status = prompt('Crop Health Condition:\n1 = 🌿 Healthy\n2 = 🐛 Pest Detected\n3 = 🍂 Yellowing', '1');
-      const label = status === '2' ? '🐛 Pest Detected' : (status === '3' ? '🍂 Yellowing' : '🌿 Healthy');
-      const note = prompt('Photo Observation Note:', 'Healthy leaf canopy, dark green coloration');
+    const LEAF_DOCTOR_PRESETS = {
+      ymv: {
+        icon: '🍂',
+        note: 'Yellow mosaic mottling on lower leaves with small whiteflies underneath.',
+        disease: 'Yellow Mosaic Virus (YMV) & Whitefly Vector',
+        severity: 'HIGH',
+        confidence: '94%',
+        bgClass: 'bg-red-50 border-red-200',
+        badgeClass: 'bg-red-700 text-white',
+        summary: 'Yellow mottling with tiny white sucking flies indicates early Yellow Mosaic Virus spread by Bemisia tabaci.',
+        weatherWarn: 'IMD Rain-Fastness Alert: 14mm rain forecast at 6:00 PM. Hold foliar sprays until tomorrow morning.',
+        organic: '6-8 yellow sticky traps/acre + 5% Neem Seed Kernel Extract (NSKE)',
+        chemical: 'Acetamiprid 20% SP @ 0.2 g/L water (40 g/acre)',
+        source: 'PJTSAU Soybean Kharif 2026 Bulletin #4'
+      },
+      caterpillar: {
+        icon: '🐛',
+        note: 'Chewed leaf margins and skeletonized holes caused by green caterpillars.',
+        disease: 'Spodoptera Leaf Caterpillar (Spodoptera litura)',
+        severity: 'MODERATE',
+        confidence: '91%',
+        bgClass: 'bg-amber-50 border-amber-200',
+        badgeClass: 'bg-amber-700 text-white',
+        summary: 'Irregular skeletonized patches indicate defoliating caterpillars feeding on vegetative foliage.',
+        weatherWarn: 'IMD Rain-Fastness Alert: Hold spraying ahead of 6:00 PM rainfall to prevent chemical wash-off.',
+        organic: 'SlNPV 250 LE/acre + hand-destroy egg masses on borders',
+        chemical: 'Emamectin Benzoate 5% SG @ 0.4 g/L (80 g/acre) if >1 larva/m',
+        source: 'PJTSAU Soybean Kharif 2026 Bulletin #4'
+      },
+      pod_borer: {
+        icon: '🫘',
+        note: 'Circular bore holes visible on developing green soybean pods.',
+        disease: 'Gram Pod Borer (Helicoverpa armigera)',
+        severity: 'CRITICAL',
+        confidence: '93%',
+        bgClass: 'bg-rose-50 border-rose-300',
+        badgeClass: 'bg-rose-800 text-white',
+        summary: 'Circular pod bore holes indicate Helicoverpa pod borer pressure risking direct grain yield loss.',
+        weatherWarn: 'IMD Rain-Fastness Alert: Wait for 3-4 hour rain-free window before spraying pods.',
+        organic: 'HaNPV 250 LE/acre + 15 T-shaped bird perches/acre',
+        chemical: 'Chlorantraniliprole 18.5% SC @ 0.3 ml/L (14-day pre-harvest interval)',
+        source: 'PJTSAU Kharif Pod Protection Protocol'
+      },
+      rust: {
+        icon: '🍄',
+        note: 'Reddish-brown rust pustules appearing on lower soybean leaves after rain.',
+        disease: 'Soybean Rust & Cercospora Leaf Blight',
+        severity: 'HIGH',
+        confidence: '90%',
+        bgClass: 'bg-orange-50 border-orange-200',
+        badgeClass: 'bg-orange-700 text-white',
+        summary: 'Brown necrotic pustules match fungal infection triggered by prolonged high canopy humidity.',
+        weatherWarn: 'IMD Rain-Fastness Alert: Clear furrow drainage first; spray Hexaconazole once rain clears.',
+        organic: 'Trichoderma viride + Pseudomonas fluorescens @ 5 g/L',
+        chemical: 'Hexaconazole 5% EC @ 2 ml/L or Tebuconazole 25.9% EC @ 1.5 ml/L',
+        source: 'ICAR-IISR Soybean Rust Advisory'
+      },
+      healthy: {
+        icon: '🌿',
+        note: 'Healthy dark green leaf canopy with strong branching and no spots.',
+        disease: 'Healthy Crop Canopy — No Active Pathology',
+        severity: 'HEALTHY',
+        confidence: '95%',
+        bgClass: 'bg-emerald-50 border-emerald-200',
+        badgeClass: 'bg-emerald-700 text-white',
+        summary: 'Vigorous green chlorophyll coloration with zero fungal lesions or insect feeding damage.',
+        weatherWarn: null,
+        organic: 'Keep 4-6 yellow sticky traps/acre for preventive scouting only',
+        chemical: 'No chemical spray required today',
+        source: 'PJTSAU Soybean Kharif 2026 Bulletin #4'
+      }
+    };
+
+    let activeLeafPresetKey = 'ymv';
+
+    function toggleLeafDoctorModal() {
+      const modal = document.getElementById('leaf-doctor-modal');
+      if (modal) modal.classList.toggle('hidden');
+    }
+
+    function selectLeafPreset(key) {
+      activeLeafPresetKey = key;
+      const preset = LEAF_DOCTOR_PRESETS[key] || LEAF_DOCTOR_PRESETS.ymv;
+      document.getElementById('leaf-scan-thumb').textContent = preset.icon;
+      document.getElementById('leaf-symptom-input').value = preset.note;
+      document.querySelectorAll('.leaf-preset-btn').forEach(btn => {
+        btn.className = 'leaf-preset-btn px-2.5 py-1.5 rounded-xl text-[11px] font-semibold bg-slate-100 text-slate-700 border border-slate-200';
+      });
+      const activeBtn = document.getElementById('preset-' + key);
+      if (activeBtn) {
+        activeBtn.className = 'leaf-preset-btn px-2.5 py-1.5 rounded-xl text-[11px] font-bold bg-emerald-100 text-emerald-900 border border-emerald-400';
+      }
+    }
+
+    function runLeafDoctorDiagnosis() {
+      const inputVal = (document.getElementById('leaf-symptom-input').value || '').toLowerCase();
+      let chosenKey = activeLeafPresetKey;
+      if (inputVal.includes('pod') || inputVal.includes('hole') && inputVal.includes('pod')) chosenKey = 'pod_borer';
+      else if (inputVal.includes('rust') || inputVal.includes('pustule') || inputVal.includes('blight')) chosenKey = 'rust';
+      else if (inputVal.includes('caterpillar') || inputVal.includes('worm') || inputVal.includes('chew')) chosenKey = 'caterpillar';
+      else if (inputVal.includes('healthy') || inputVal.includes('dark green')) chosenKey = 'healthy';
+      else if (inputVal.includes('yellow') || inputVal.includes('whitefl') || inputVal.includes('mosaic')) chosenKey = 'ymv';
+
+      const d = LEAF_DOCTOR_PRESETS[chosenKey];
+      const diagHtml = `
+        <div class="flex items-center justify-between">
+          <span class="text-[10px] font-extrabold uppercase tracking-wider text-slate-700">🔬 Leaf Doctor • ${d.confidence} Match</span>
+          <span class="px-2 py-0.5 rounded-full text-[9px] font-extrabold ${d.badgeClass}">${d.severity}</span>
+        </div>
+        <h4 class="font-extrabold text-xs text-slate-900">${d.disease}</h4>
+        <p class="text-[11px] text-slate-700 leading-snug">${d.summary}</p>
+        ${d.weatherWarn ? `<div class="p-2 bg-amber-100/90 border border-amber-300 rounded-xl text-[10px] font-bold text-amber-950">⚠️ ${d.weatherWarn}</div>` : ''}
+        <div class="space-y-1 text-[10px] pt-1 border-t border-slate-200/70">
+          <p><strong class="text-emerald-800">🌿 Organic IPM:</strong> ${d.organic}</p>
+          <p><strong class="text-slate-800">🧪 Dose:</strong> ${d.chemical}</p>
+          <p class="text-slate-500 italic">Source: ${d.source}</p>
+        </div>
+      `;
+
+      const modalOut = document.getElementById('leaf-modal-output');
+      modalOut.className = `p-3.5 rounded-2xl border space-y-2 text-xs ${d.bgClass}`;
+      modalOut.innerHTML = diagHtml;
+      modalOut.classList.remove('hidden');
+
+      const farmCard = document.getElementById('leaf-doctor-result-card');
+      if (farmCard) {
+        farmCard.className = `p-3.5 rounded-2xl border shadow-2xs space-y-2 transition-all ${d.bgClass}`;
+        farmCard.innerHTML = diagHtml;
+        farmCard.classList.remove('hidden');
+      }
 
       farmActivitiesCount++;
       document.getElementById('space-total-activities').textContent = farmActivitiesCount + ' Logged';
       document.getElementById('activity-badge-count').textContent = farmActivitiesCount + ' items';
 
       const feed = document.getElementById('space-activities-feed');
-      const newCard = document.createElement('div');
-      newCard.className = 'p-2.5 bg-blue-50/70 rounded-xl border border-blue-200 flex items-center justify-between';
-      newCard.innerHTML = `
-        <div class="flex items-center gap-2">
-          <span class="p-1.5 bg-white rounded-lg border border-blue-300 text-xs">📷</span>
-          <div>
-            <p class="font-bold text-slate-900 text-xs">Crop Photo (${label})</p>
-            <p class="text-[10px] text-slate-600">${note || 'Field photo captured'}</p>
+      if (feed) {
+        const newCard = document.createElement('div');
+        newCard.className = 'p-2.5 bg-blue-50/70 rounded-xl border border-blue-200 flex items-center justify-between';
+        newCard.innerHTML = `
+          <div class="flex items-center gap-2">
+            <span class="p-1.5 bg-white rounded-lg border border-blue-300 text-xs">🔬</span>
+            <div>
+              <p class="font-bold text-slate-900 text-xs">Leaf Doctor (${d.severity})</p>
+              <p class="text-[10px] text-slate-600">${d.disease}</p>
+            </div>
           </div>
-        </div>
-        <span class="text-[10px] text-blue-700 font-semibold">Just now</span>
-      `;
-      feed.insertBefore(newCard, feed.firstChild);
+          <span class="text-[10px] text-blue-700 font-semibold">Just now</span>
+        `;
+        feed.insertBefore(newCard, feed.firstChild);
+      }
+    }
+
+    function promptFieldPhoto() {
+      toggleLeafDoctorModal();
     }
 
     // Onboarding Multi-Step Controller
