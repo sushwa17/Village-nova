@@ -659,7 +659,7 @@ class _MyVillageScreenState extends ConsumerState<MyVillageScreen> {
                     children: ['panchayat', 'agriculture', 'health', 'community'].map((c) {
                       final selected = category == c;
                       return ChoiceChip(
-                        label: Text(c[0].toUpperCase() + c.substring(1)),
+                        label: Text('${c[0].toUpperCase()}${c.substring(1)}'),
                         selected: selected,
                         selectedColor: const Color(0xFFDCFCE7),
                         onSelected: (val) {

@@ -279,7 +279,7 @@ class _MySpaceScreenState extends ConsumerState<MySpaceScreen> {
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
                       Text(
-                        crop.cropName + (crop.variety != null ? ' (${crop.variety})' : ''),
+                        '${crop.cropName}${crop.variety != null ? ' (${crop.variety})' : ''}',
                         style: const TextStyle(
                           fontSize: 17,
                           fontWeight: FontWeight.w800,
@@ -874,7 +874,7 @@ class _MySpaceScreenState extends ConsumerState<MySpaceScreen> {
 
   String _capitalize(String s) {
     if (s.isEmpty) return s;
-    return s[0].toUpperCase() + s.substring(1);
+    return '${s[0].toUpperCase()}${s.substring(1)}';
   }
 
   // Bottom Sheets for Interactive Logging
