@@ -268,7 +268,9 @@ class FarmNotifier extends StateNotifier<FarmState> {
           'cost_incurred': cost,
         },
       );
-    } catch (_) {}
+    } catch (_) {
+      // Offline optimistic update still records the activity locally
+    }
 
     // Optimistically append activity to local state
     if (state.farm != null) {
@@ -314,7 +316,9 @@ class FarmNotifier extends StateNotifier<FarmState> {
           'notes': notes,
         },
       );
-    } catch (_) {}
+    } catch (_) {
+      // Offline optimistic update still records the activity locally
+    }
 
     if (state.farm != null) {
       final newExp = FarmExpenseModel(
@@ -343,13 +347,13 @@ class FarmNotifier extends StateNotifier<FarmState> {
   }
 
   void _setFallbackFarm() {
-    final stages = [
-      const CropStageStepModel(stageKey: 'sowing', title: 'Sowing & Seeding', daysRange: 'Day 1-5', isCompleted: true, isCurrent: false),
-      const CropStageStepModel(stageKey: 'germination', title: 'Germination & Emergence', daysRange: 'Day 6-12', isCompleted: true, isCurrent: false),
-      const CropStageStepModel(stageKey: 'vegetative', title: 'Vegetative & Branching', daysRange: 'Day 13-55', isCompleted: false, isCurrent: true),
-      const CropStageStepModel(stageKey: 'flowering', title: 'Flowering & Blossom', daysRange: 'Day 56-75', isCompleted: false, isCurrent: false),
-      const CropStageStepModel(stageKey: 'pod_formation', title: 'Pod Formation & Fill', daysRange: 'Day 76-95', isCompleted: false, isCurrent: false),
-      const CropStageStepModel(stageKey: 'harvest', title: 'Maturity & Harvest', daysRange: 'Day 96-115', isCompleted: false, isCurrent: false),
+    const stages = [
+      CropStageStepModel(stageKey: 'sowing', title: 'Sowing & Seeding', daysRange: 'Day 1-5', isCompleted: true, isCurrent: false),
+      CropStageStepModel(stageKey: 'germination', title: 'Germination & Emergence', daysRange: 'Day 6-12', isCompleted: true, isCurrent: false),
+      CropStageStepModel(stageKey: 'vegetative', title: 'Vegetative & Branching', daysRange: 'Day 13-55', isCompleted: false, isCurrent: true),
+      CropStageStepModel(stageKey: 'flowering', title: 'Flowering & Blossom', daysRange: 'Day 56-75', isCompleted: false, isCurrent: false),
+      CropStageStepModel(stageKey: 'pod_formation', title: 'Pod Formation & Fill', daysRange: 'Day 76-95', isCompleted: false, isCurrent: false),
+      CropStageStepModel(stageKey: 'harvest', title: 'Maturity & Harvest', daysRange: 'Day 96-115', isCompleted: false, isCurrent: false),
     ];
 
     final crop = CropDetailModel(

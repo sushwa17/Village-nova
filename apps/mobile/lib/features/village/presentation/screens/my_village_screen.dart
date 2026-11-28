@@ -305,7 +305,7 @@ class _MyVillageScreenState extends ConsumerState<MyVillageScreen> {
           // Scenario Switcher Chips
           Wrap(
             spacing: 6,
-            children: [
+            children: const [
               {'key': 'default', 'label': '6 PM Storm'},
               {'key': 'clear_morning', 'label': 'Clear Morning'},
               {'key': 'high_wind', 'label': 'High Wind'},
@@ -372,9 +372,9 @@ class _MyVillageScreenState extends ConsumerState<MyVillageScreen> {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        Row(
+        const Row(
           mainAxisAlignment: MainAxisAlignment.spaceBetween,
-          children: const [
+          children: [
             Text(
               'APMC MANDI RATES (వికారాబాద్ మార్కెట్)',
               style: TextStyle(
@@ -468,7 +468,7 @@ class _MyVillageScreenState extends ConsumerState<MyVillageScreen> {
   }
 
   Widget _buildCategoryFilters(String selected) {
-    final categories = [
+    const categories = [
       {'key': 'all', 'label': 'All Notices'},
       {'key': 'panchayat', 'label': '🏛️ Panchayat'},
       {'key': 'agriculture', 'label': '🌾 Agriculture'},
@@ -634,13 +634,13 @@ class _MyVillageScreenState extends ConsumerState<MyVillageScreen> {
       ),
       builder: (ctx) {
         return StatefulBuilder(
-          builder: (context, setModalState) {
+          builder: (modalCtx, setModalState) {
             return Padding(
               padding: EdgeInsets.only(
                 left: 20,
                 right: 20,
                 top: 20,
-                bottom: MediaQuery.of(context).viewInsets.bottom + 20,
+                bottom: MediaQuery.of(modalCtx).viewInsets.bottom + 20,
               ),
               child: Column(
                 mainAxisSize: MainAxisSize.min,
@@ -698,8 +698,10 @@ class _MyVillageScreenState extends ConsumerState<MyVillageScreen> {
                   StitchButton(
                     text: 'Publish Notice to Village',
                     onPressed: () async {
+                      final navigator = Navigator.of(ctx);
+                      final messenger = ScaffoldMessenger.of(context);
                       if (titleController.text.isEmpty || contentController.text.isEmpty) {
-                        ScaffoldMessenger.of(context).showSnackBar(
+                        messenger.showSnackBar(
                           const SnackBar(content: Text('Please enter both title and details')),
                         );
                         return;
@@ -713,10 +715,10 @@ class _MyVillageScreenState extends ConsumerState<MyVillageScreen> {
                           );
 
                       if (ctx.mounted) {
-                        Navigator.pop(ctx);
+                        navigator.pop();
                       }
-                      if (this.context.mounted) {
-                        ScaffoldMessenger.of(this.context).showSnackBar(
+                      if (mounted) {
+                        messenger.showSnackBar(
                           const SnackBar(content: Text('Village notice published successfully!')),
                         );
                       }

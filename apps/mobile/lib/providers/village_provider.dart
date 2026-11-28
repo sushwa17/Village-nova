@@ -142,7 +142,9 @@ class VillageNotifier extends StateNotifier<VillageState> {
           'author_role': 'Farmer / Resident',
         },
       );
-    } catch (_) {}
+    } catch (_) {
+      // Offline optimistic insert keeps bulletin visible locally
+    }
 
     if (state.feed != null) {
       final newBulletin = VillageUpdateModel(

@@ -117,7 +117,9 @@ class AskNotifier extends StateNotifier<AskState> {
     if (currentConvId != null) {
       try {
         await apiClient.dio.delete('/ask/conversations/$currentConvId');
-      } catch (_) {}
+      } catch (_) {
+        // Offline resilient fallback: clear local conversation anyway
+      }
     }
     state = AskState(
       conversationId: 'conv_${DateTime.now().millisecondsSinceEpoch}',

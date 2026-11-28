@@ -369,9 +369,9 @@ class _MySpaceScreenState extends ConsumerState<MySpaceScreen> {
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          Row(
+          const Row(
             mainAxisAlignment: MainAxisAlignment.spaceBetween,
-            children: const [
+            children: [
               Text(
                 'AGRONOMIC LIFECYCLE TIMELINE',
                 style: TextStyle(
@@ -882,7 +882,7 @@ class _MySpaceScreenState extends ConsumerState<MySpaceScreen> {
     final typeController = TextEditingController(text: 'Irrigation');
     final descController = TextEditingController();
     final costController = TextEditingController(text: '0');
-    final types = ['Irrigation', 'Fertilizer', 'Pesticide', 'Weeding', 'Scouting', 'Harvest'];
+    const types = ['Irrigation', 'Fertilizer', 'Pesticide', 'Weeding', 'Scouting', 'Harvest'];
 
     showModalBottomSheet(
       context: context,
@@ -892,13 +892,13 @@ class _MySpaceScreenState extends ConsumerState<MySpaceScreen> {
       ),
       builder: (ctx) {
         return StatefulBuilder(
-          builder: (context, setModalState) {
+          builder: (modalCtx, setModalState) {
             return Padding(
               padding: EdgeInsets.only(
                 left: 20,
                 right: 20,
                 top: 20,
-                bottom: MediaQuery.of(context).viewInsets.bottom + 20,
+                bottom: MediaQuery.of(modalCtx).viewInsets.bottom + 20,
               ),
               child: Column(
                 mainAxisSize: MainAxisSize.min,
@@ -948,6 +948,8 @@ class _MySpaceScreenState extends ConsumerState<MySpaceScreen> {
                   StitchButton(
                     text: 'Save Activity',
                     onPressed: () async {
+                      final navigator = Navigator.of(ctx);
+                      final messenger = ScaffoldMessenger.of(context);
                       final cost = double.tryParse(costController.text) ?? 0.0;
                       await ref.read(farmProvider.notifier).logActivity(
                             activityType: typeController.text.toLowerCase(),
@@ -955,10 +957,10 @@ class _MySpaceScreenState extends ConsumerState<MySpaceScreen> {
                             cost: cost,
                           );
                       if (ctx.mounted) {
-                        Navigator.pop(ctx);
+                        navigator.pop();
                       }
-                      if (this.context.mounted) {
-                        ScaffoldMessenger.of(this.context).showSnackBar(
+                      if (mounted) {
+                        messenger.showSnackBar(
                           SnackBar(content: Text('Activity "${typeController.text}" logged successfully!')),
                         );
                       }
@@ -977,7 +979,7 @@ class _MySpaceScreenState extends ConsumerState<MySpaceScreen> {
     final catController = TextEditingController(text: 'fertilizer');
     final amountController = TextEditingController();
     final notesController = TextEditingController();
-    final categories = ['seeds', 'fertilizer', 'pesticide', 'labor', 'machinery', 'irrigation'];
+    const categories = ['seeds', 'fertilizer', 'pesticide', 'labor', 'machinery', 'irrigation'];
 
     showModalBottomSheet(
       context: context,
@@ -987,13 +989,13 @@ class _MySpaceScreenState extends ConsumerState<MySpaceScreen> {
       ),
       builder: (ctx) {
         return StatefulBuilder(
-          builder: (context, setModalState) {
+          builder: (modalCtx, setModalState) {
             return Padding(
               padding: EdgeInsets.only(
                 left: 20,
                 right: 20,
                 top: 20,
-                bottom: MediaQuery.of(context).viewInsets.bottom + 20,
+                bottom: MediaQuery.of(modalCtx).viewInsets.bottom + 20,
               ),
               child: Column(
                 mainAxisSize: MainAxisSize.min,
@@ -1043,9 +1045,11 @@ class _MySpaceScreenState extends ConsumerState<MySpaceScreen> {
                   StitchButton(
                     text: 'Record Expense',
                     onPressed: () async {
+                      final navigator = Navigator.of(ctx);
+                      final messenger = ScaffoldMessenger.of(context);
                       final amount = double.tryParse(amountController.text) ?? 0.0;
                       if (amount <= 0) {
-                        ScaffoldMessenger.of(context).showSnackBar(
+                        messenger.showSnackBar(
                           const SnackBar(content: Text('Please enter a valid amount')),
                         );
                         return;
@@ -1056,10 +1060,10 @@ class _MySpaceScreenState extends ConsumerState<MySpaceScreen> {
                             notes: notesController.text.isNotEmpty ? notesController.text : null,
                           );
                       if (ctx.mounted) {
-                        Navigator.pop(ctx);
+                        navigator.pop();
                       }
-                      if (this.context.mounted) {
-                        ScaffoldMessenger.of(this.context).showSnackBar(
+                      if (mounted) {
+                        messenger.showSnackBar(
                           SnackBar(content: Text('Expense of ₹$amount recorded!')),
                         );
                       }
@@ -1088,13 +1092,13 @@ class _MySpaceScreenState extends ConsumerState<MySpaceScreen> {
       ),
       builder: (ctx) {
         return StatefulBuilder(
-          builder: (context, setModalState) {
+          builder: (modalCtx, setModalState) {
             return Padding(
               padding: EdgeInsets.only(
                 left: 20,
                 right: 20,
                 top: 20,
-                bottom: MediaQuery.of(context).viewInsets.bottom + 20,
+                bottom: MediaQuery.of(modalCtx).viewInsets.bottom + 20,
               ),
               child: Column(
                 mainAxisSize: MainAxisSize.min,
@@ -1175,6 +1179,8 @@ class _MySpaceScreenState extends ConsumerState<MySpaceScreen> {
                   StitchButton(
                     text: 'Diagnose with Leaf Doctor',
                     onPressed: () async {
+                      final navigator = Navigator.of(ctx);
+                      final messenger = ScaffoldMessenger.of(context);
                       final diag = await ref.read(farmProvider.notifier).diagnoseLeaf(
                             symptomText: noteController.text.isNotEmpty
                                 ? noteController.text
@@ -1182,10 +1188,10 @@ class _MySpaceScreenState extends ConsumerState<MySpaceScreen> {
                             severityHint: healthStatus,
                           );
                       if (ctx.mounted) {
-                        Navigator.pop(ctx);
+                        navigator.pop();
                       }
-                      if (this.context.mounted && diag != null) {
-                        ScaffoldMessenger.of(this.context).showSnackBar(
+                      if (mounted && diag != null) {
+                        messenger.showSnackBar(
                           SnackBar(
                             content: Text(
                               'Leaf Doctor: ${diag.diseaseOrPestName} (${diag.severityLevel.toUpperCase()})',

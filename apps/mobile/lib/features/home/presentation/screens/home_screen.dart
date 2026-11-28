@@ -159,8 +159,8 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
               borderRadius: BorderRadius.circular(20),
               border: Border.all(color: AppColors.primaryGreenLight),
             ),
-            child: Row(
-              children: const [
+            child: const Row(
+              children: [
                 Icon(Icons.auto_awesome, size: 16, color: AppColors.primaryGreen),
                 SizedBox(width: 6),
                 Text(
@@ -229,9 +229,9 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          Row(
+          const Row(
             mainAxisAlignment: MainAxisAlignment.spaceBetween,
-            children: const [
+            children: [
               Text(
                 "TODAY'S ACTIONS",
                 style: TextStyle(
@@ -288,7 +288,7 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
                 ),
               ),
             );
-          }).toList(),
+          }),
         ],
       ),
     );
@@ -417,9 +417,9 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
           child: StitchCard(
             onTap: widget.onOpenVillage,
             padding: const EdgeInsets.all(14),
-            child: Column(
+            child: const Column(
               crossAxisAlignment: CrossAxisAlignment.start,
-              children: const [
+              children: [
                 Icon(Icons.campaign_outlined, color: AppColors.warning, size: 28),
                 SizedBox(height: 8),
                 Text('My Village', style: TextStyle(fontSize: 15, fontWeight: FontWeight.w700)),
@@ -434,9 +434,9 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
           child: StitchCard(
             onTap: widget.onOpenSchemes,
             padding: const EdgeInsets.all(14),
-            child: Column(
+            child: const Column(
               crossAxisAlignment: CrossAxisAlignment.start,
-              children: const [
+              children: [
                 Icon(Icons.stars_outlined, color: AppColors.primaryGreen, size: 28),
                 SizedBox(height: 8),
                 Text('Schemes', style: TextStyle(fontSize: 15, fontWeight: FontWeight.w700)),

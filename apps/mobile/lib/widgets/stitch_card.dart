@@ -61,7 +61,6 @@ class StitchCard extends StatelessWidget {
         border = StitchTokens.slate200;
         break;
       case StitchCardVariant.surface:
-      default:
         bg = Colors.white;
         border = StitchTokens.slate200;
     }

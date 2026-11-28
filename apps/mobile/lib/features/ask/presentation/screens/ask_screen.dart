@@ -126,8 +126,8 @@ class _AskVillageNovaScreenState extends ConsumerState<AskVillageNovaScreen> {
     return Scaffold(
       backgroundColor: AppColors.backgroundLight,
       appBar: AppBar(
-        title: Row(
-          children: const [
+        title: const Row(
+          children: [
             Icon(Icons.auto_awesome, color: AppColors.secondaryGold, size: 22),
             SizedBox(width: 8),
             Text(
@@ -203,9 +203,9 @@ class _AskVillageNovaScreenState extends ConsumerState<AskVillageNovaScreen> {
                         borderRadius: BorderRadius.circular(16),
                         border: Border.all(color: const Color(0xFFE5E7EB)),
                       ),
-                      child: Row(
+                      child: const Row(
                         mainAxisSize: MainAxisSize.min,
-                        children: const [
+                        children: [
                           SizedBox(
                             width: 14,
                             height: 14,
@@ -239,7 +239,7 @@ class _AskVillageNovaScreenState extends ConsumerState<AskVillageNovaScreen> {
   }
 
   Widget _buildQuickPromptsBar() {
-    final prompts = [
+    const prompts = [
       'What should I do today?',
       'Check mandi prices',
       'Pest on soybean leaves',
@@ -291,9 +291,9 @@ class _AskVillageNovaScreenState extends ConsumerState<AskVillageNovaScreen> {
             ),
             if (isPending) ...[
               const SizedBox(height: 4),
-              Row(
+              const Row(
                 mainAxisSize: MainAxisSize.min,
-                children: const [
+                children: [
                   Icon(Icons.schedule, size: 12, color: StitchTokens.gold600),
                   SizedBox(width: 4),
                   Text('Queued (Offline)', style: TextStyle(fontSize: 10, color: StitchTokens.gold600, fontWeight: FontWeight.w600)),
@@ -304,9 +304,9 @@ class _AskVillageNovaScreenState extends ConsumerState<AskVillageNovaScreen> {
               const SizedBox(height: 4),
               InkWell(
                 onTap: () => ref.read(askProvider.notifier).retryMessage(msg.id),
-                child: Row(
+                child: const Row(
                   mainAxisSize: MainAxisSize.min,
-                  children: const [
+                  children: [
                     Icon(Icons.refresh, size: 12, color: StitchTokens.rose700),
                     SizedBox(width: 4),
                     Text('Failed • Tap to Retry', style: TextStyle(fontSize: 10, color: StitchTokens.rose700, fontWeight: FontWeight.w700)),
@@ -339,8 +339,8 @@ class _AskVillageNovaScreenState extends ConsumerState<AskVillageNovaScreen> {
             Row(
               mainAxisAlignment: MainAxisAlignment.spaceBetween,
               children: [
-                Row(
-                  children: const [
+                const Row(
+                  children: [
                     Icon(Icons.auto_awesome, color: AppColors.primaryGreen, size: 18),
                     SizedBox(width: 6),
                     Text('VillageNova Guidance', style: TextStyle(fontSize: 13, fontWeight: FontWeight.w700, color: AppColors.primaryGreen)),

@@ -10,7 +10,6 @@ class AppTheme {
         primary: AppColors.primaryGreen,
         secondary: AppColors.secondaryGold,
         surface: AppColors.cardSurface,
-        background: AppColors.backgroundLight,
         error: AppColors.error,
       ),
       scaffoldBackgroundColor: AppColors.backgroundLight,

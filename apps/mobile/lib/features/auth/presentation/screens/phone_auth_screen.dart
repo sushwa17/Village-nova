@@ -38,6 +38,7 @@ class _PhoneAuthScreenState extends ConsumerState<PhoneAuthScreen> {
     }
 
     await ref.read(authProvider.notifier).sendOtp(phoneController.text);
+    if (!mounted) return;
     setState(() {
       isOtpSent = true;
     });
@@ -52,6 +53,7 @@ class _PhoneAuthScreenState extends ConsumerState<PhoneAuthScreen> {
     }
 
     await ref.read(authProvider.notifier).verifyOtp(otpController.text);
+    if (!mounted) return;
     widget.onAuthSuccess();
   }
 
@@ -102,9 +104,9 @@ class _PhoneAuthScreenState extends ConsumerState<PhoneAuthScreen> {
                   keyboardType: TextInputType.phone,
                   maxLength: 10,
                   style: const TextStyle(fontSize: 18, fontWeight: FontWeight.w600),
-                  decoration: InputDecoration(
+                  decoration: const InputDecoration(
                     prefixText: '+91  ',
-                    prefixStyle: const TextStyle(
+                    prefixStyle: TextStyle(
                       fontSize: 18,
                       fontWeight: FontWeight.w700,
                       color: AppColors.textPrimary,

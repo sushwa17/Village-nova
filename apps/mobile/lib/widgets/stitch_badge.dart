@@ -75,7 +75,6 @@ class StitchBadge extends StatelessWidget {
         text = StitchTokens.gold800;
         break;
       case StitchBadgeVariant.neutral:
-      default:
         bg = StitchTokens.slate100;
         border = StitchTokens.slate200;
         text = StitchTokens.slate700;
