@@ -12,28 +12,72 @@ import logging
 logger = logging.getLogger(__name__)
 
 
-def get_hyperlocal_weather(village: str = "Ananthagiri", district: str = "Vikarabad") -> Dict[str, Any]:
+def get_hyperlocal_weather(
+    village: str = "Ananthagiri",
+    district: str = "Vikarabad",
+    crop_name: str = "Soybean",
+    crop_stage: str = "vegetative",
+) -> Dict[str, Any]:
     """
-    Retrieves current weather, 24-hour forecast, and agronomic rain advisories
+    Retrieves current weather, 24-hour forecast, spray hazard triggers, and optimal spray window
     for a given village or mandal.
     """
+    from app.services.weather import build_simulated_weather
+    forecast = build_simulated_weather(
+        village_name=village,
+        scenario="default",
+        crop_name=crop_name,
+        crop_stage=crop_stage,
+    )
     return {
         "location": f"{village}, {district}",
-        "current_temp_c": 31.0,
-        "current_humidity_pct": 72,
-        "wind_speed_kmh": 12.5,
-        "forecast_rain_expected": True,
-        "rain_arrival_time": "6:00 PM today",
-        "expected_precipitation_mm": 14.0,
-        "rain_probability_pct": 85,
-        "spray_hazard": "HIGH_RISK",
-        "advisory": (
-            f"Moderate rainfall (14mm) forecasted over {village} at 6:00 PM. "
-            "Hold foliar spray and fertilizer application to prevent chemical runoff. "
-            "Ensure field drainage bunds are unclogged before 5:00 PM."
-        ),
-        "source": "Open-Meteo High-Resolution Rural Grid (Vikarabad Hub)",
+        "current_temp_c": forecast.temp_c,
+        "current_humidity_pct": forecast.humidity_pct,
+        "wind_speed_kmh": forecast.wind_speed_kmh,
+        "forecast_rain_expected": forecast.rainfall_mm > 0,
+        "rain_arrival_time": forecast.expected_rain_time or "No rain expected",
+        "expected_precipitation_mm": forecast.rainfall_mm,
+        "rain_probability_pct": forecast.rain_prob_pct,
+        "spray_hazard": forecast.spray_risk_level,
+        "spray_action": forecast.spray_action,
+        "best_spray_window": forecast.best_spray_window,
+        "irrigation_action": forecast.irrigation_action,
+        "trigger_reasons": forecast.trigger_reasons,
+        "advisory": forecast.advisory,
+        "source": forecast.source,
         "timestamp": datetime.datetime.now().strftime("%Y-%m-%d %H:%M")
+    }
+
+
+def evaluate_spray_window(
+    village: str = "Ananthagiri",
+    crop_name: str = "Soybean",
+    crop_stage: str = "vegetative",
+    scenario: str = "default",
+) -> Dict[str, Any]:
+    """
+    Evaluates IMD 3-4 hour rain-fastness, wind drift (>15 km/h), and flowering bee-pollinator
+    triggers to determine whether spraying is safe now and identify the next safe window.
+    """
+    from app.services.weather import build_simulated_weather
+    forecast = build_simulated_weather(
+        village_name=village,
+        scenario=scenario,
+        crop_name=crop_name,
+        crop_stage=crop_stage,
+    )
+    return {
+        "village": forecast.village_name,
+        "crop_name": crop_name,
+        "crop_stage": crop_stage,
+        "scenario": scenario,
+        "spray_risk_level": forecast.spray_risk_level,
+        "spray_action": forecast.spray_action,
+        "is_spray_safe_now": forecast.spray_action == "SPRAY_ALLOWED",
+        "best_spray_window": forecast.best_spray_window,
+        "irrigation_action": forecast.irrigation_action,
+        "trigger_reasons": forecast.trigger_reasons,
+        "crop_stage_note": forecast.crop_stage_note,
     }
 
 
@@ -421,5 +465,20 @@ TOOL_MANIFEST: List[Dict[str, Any]] = [
             "required": ["symptom_text"]
         },
         "callable": diagnose_crop_leaf
+    },
+    {
+        "name": "evaluate_spray_window",
+        "description": "Evaluate IMD rain-fastness, wind drift, and crop-stage bee safety triggers to return safe pesticide/foliar spray windows.",
+        "parameters": {
+            "type": "object",
+            "properties": {
+                "village": {"type": "string", "description": "Village name (e.g. Ananthagiri)"},
+                "crop_name": {"type": "string", "description": "Crop name (e.g. Soybean, Cotton)"},
+                "crop_stage": {"type": "string", "description": "Crop stage (e.g. vegetative, flowering, pod_formation)"},
+                "scenario": {"type": "string", "description": "Optional forecast scenario (default, clear_morning, high_wind, dry_spell)"}
+            },
+            "required": ["village"]
+        },
+        "callable": evaluate_spray_window
     }
 ]

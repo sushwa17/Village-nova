@@ -67,8 +67,8 @@ class _MyVillageScreenState extends ConsumerState<MyVillageScreen> {
                         const SizedBox(height: 14),
                       ],
 
-                      // 3. Hyperlocal Weather & Ag Advisory Card
-                      _buildWeatherCard(feed.weather),
+                      // 3. Hyperlocal Weather & Dynamic Spray Trigger Card
+                      _buildWeatherCard(feed.weather, villageState.selectedScenario),
                       const SizedBox(height: 16),
 
                       // 4. APMC Mandi Market Prices Ticker
@@ -214,7 +214,16 @@ class _MyVillageScreenState extends ConsumerState<MyVillageScreen> {
     );
   }
 
-  Widget _buildWeatherCard(VillageWeatherModel weather) {
+  Widget _buildWeatherCard(VillageWeatherModel weather, String selectedScenario) {
+    final isSafe = weather.sprayAction == 'SPRAY_ALLOWED';
+    final isHold = weather.sprayAction == 'HOLD_SPRAY';
+    final sprayColor = isSafe
+        ? const Color(0xFF15803D)
+        : (isHold ? const Color(0xFFB91C1C) : const Color(0xFFB45309));
+    final sprayBg = isSafe
+        ? const Color(0xFFDCFCE7)
+        : (isHold ? const Color(0xFFFEE2E2) : const Color(0xFFFEF3C7));
+
     return StitchCard(
       backgroundColor: const Color(0xFFF0F9FF),
       borderColor: const Color(0xFFBAE6FD),
@@ -232,9 +241,9 @@ class _MyVillageScreenState extends ConsumerState<MyVillageScreen> {
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
                       Text(
-                        '${weather.tempC}°C',
+                        '${weather.tempC}°C • ${weather.windSpeedKmh} km/h',
                         style: const TextStyle(
-                          fontSize: 22,
+                          fontSize: 18,
                           fontWeight: FontWeight.w800,
                           color: Color(0xFF0369A1),
                         ),
@@ -250,25 +259,26 @@ class _MyVillageScreenState extends ConsumerState<MyVillageScreen> {
               Container(
                 padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 6),
                 decoration: BoxDecoration(
-                  color: const Color(0xFFE0F2FE),
+                  color: sprayBg,
                   borderRadius: BorderRadius.circular(12),
                 ),
                 child: Column(
                   children: [
                     Text(
-                      '${weather.rainProbPct}% Rain',
-                      style: const TextStyle(fontSize: 12, fontWeight: FontWeight.w800, color: Color(0xFF0369A1)),
+                      weather.sprayAction.replaceAll('_', ' '),
+                      style: TextStyle(fontSize: 10, fontWeight: FontWeight.w800, color: sprayColor),
                     ),
                     Text(
-                      '${weather.rainfallMm} mm',
-                      style: const TextStyle(fontSize: 11, color: Color(0xFF0284C7)),
+                      '${weather.rainProbPct}% • ${weather.rainfallMm} mm',
+                      style: TextStyle(fontSize: 10, fontWeight: FontWeight.w600, color: sprayColor),
                     ),
                   ],
                 ),
               ),
             ],
           ),
-          const SizedBox(height: 12),
+          const SizedBox(height: 10),
+          // Dynamic Spray Window Banner (Week 13)
           Container(
             padding: const EdgeInsets.all(10),
             decoration: BoxDecoration(
@@ -276,24 +286,47 @@ class _MyVillageScreenState extends ConsumerState<MyVillageScreen> {
               borderRadius: BorderRadius.circular(12),
               border: Border.all(color: const Color(0xFFE0F2FE)),
             ),
-            child: Row(
+            child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                const Icon(Icons.wb_incandescent_outlined, size: 16, color: Color(0xFF0284C7)),
-                const SizedBox(width: 8),
-                Expanded(
-                  child: Text(
-                    weather.advisory,
-                    style: const TextStyle(fontSize: 12, color: Color(0xFF075985), fontWeight: FontWeight.w500, height: 1.3),
-                  ),
+                Text(
+                  'Best Spray Window: ${weather.bestSprayWindow}',
+                  style: TextStyle(fontSize: 12, fontWeight: FontWeight.w800, color: sprayColor),
+                ),
+                const SizedBox(height: 4),
+                Text(
+                  weather.advisory,
+                  style: const TextStyle(fontSize: 12, color: Color(0xFF075985), fontWeight: FontWeight.w500, height: 1.3),
                 ),
               ],
             ),
           ),
-          const SizedBox(height: 12),
+          const SizedBox(height: 8),
+          // Scenario Switcher Chips
+          Wrap(
+            spacing: 6,
+            children: [
+              {'key': 'default', 'label': '6 PM Storm'},
+              {'key': 'clear_morning', 'label': 'Clear Morning'},
+              {'key': 'high_wind', 'label': 'High Wind'},
+              {'key': 'dry_spell', 'label': 'Dry Spell'},
+            ].map((s) {
+              final active = selectedScenario == s['key'];
+              return ChoiceChip(
+                label: Text(
+                  s['label']!,
+                  style: TextStyle(fontSize: 10, fontWeight: active ? FontWeight.w800 : FontWeight.w600),
+                ),
+                selected: active,
+                selectedColor: const Color(0xFFBAE6FD),
+                onSelected: (_) => ref.read(villageProvider.notifier).simulateWeatherScenario(s['key']!),
+              );
+            }).toList(),
+          ),
+          const SizedBox(height: 10),
           // Hourly Forecast Chips
           SizedBox(
-            height: 64,
+            height: 74,
             child: ListView.separated(
               scrollDirection: Axis.horizontal,
               itemCount: weather.hourly.length,
@@ -301,12 +334,14 @@ class _MyVillageScreenState extends ConsumerState<MyVillageScreen> {
               itemBuilder: (context, idx) {
                 final h = weather.hourly[idx];
                 return Container(
-                  width: 72,
+                  width: 74,
                   padding: const EdgeInsets.symmetric(vertical: 6, horizontal: 4),
                   decoration: BoxDecoration(
                     color: Colors.white,
                     borderRadius: BorderRadius.circular(12),
-                    border: Border.all(color: const Color(0xFFE0F2FE)),
+                    border: Border.all(
+                      color: h.spraySafe ? const Color(0xFF86EFAC) : const Color(0xFFFCA5A5),
+                    ),
                   ),
                   child: Column(
                     mainAxisAlignment: MainAxisAlignment.center,
@@ -314,7 +349,14 @@ class _MyVillageScreenState extends ConsumerState<MyVillageScreen> {
                       Text(h.time, style: const TextStyle(fontSize: 10, fontWeight: FontWeight.w600, color: AppColors.textSecondary)),
                       const SizedBox(height: 2),
                       Text('${h.tempC.toInt()}°', style: const TextStyle(fontSize: 12, fontWeight: FontWeight.w800)),
-                      Text('${h.rainProb}% 💧', style: const TextStyle(fontSize: 9, color: Color(0xFF0284C7), fontWeight: FontWeight.w700)),
+                      Text(
+                        h.spraySafe ? 'Safe' : '${h.rainProb}% Rain',
+                        style: TextStyle(
+                          fontSize: 9,
+                          color: h.spraySafe ? const Color(0xFF15803D) : const Color(0xFFB91C1C),
+                          fontWeight: FontWeight.w700,
+                        ),
+                      ),
                     ],
                   ),
                 );
@@ -508,8 +550,8 @@ class _MyVillageScreenState extends ConsumerState<MyVillageScreen> {
                         ),
                       ),
                     ),
-                    Row(
-                      children: const [
+                    const Row(
+                      children: [
                         Icon(Icons.verified, size: 14, color: AppColors.primaryGreen),
                         SizedBox(width: 4),
                         Text(
@@ -549,9 +591,9 @@ class _MyVillageScreenState extends ConsumerState<MyVillageScreen> {
                         ),
                       ],
                     ),
-                    Text(
+                    const Text(
                       'Recently',
-                      style: const TextStyle(fontSize: 10, color: AppColors.textMuted),
+                      style: TextStyle(fontSize: 10, color: AppColors.textMuted),
                     ),
                   ],
                 ),
@@ -670,9 +712,11 @@ class _MyVillageScreenState extends ConsumerState<MyVillageScreen> {
                             isEmergency: isEmergency,
                           );
 
-                      if (context.mounted) {
+                      if (ctx.mounted) {
                         Navigator.pop(ctx);
-                        ScaffoldMessenger.of(context).showSnackBar(
+                      }
+                      if (this.context.mounted) {
+                        ScaffoldMessenger.of(this.context).showSnackBar(
                           const SnackBar(content: Text('Village notice published successfully!')),
                         );
                       }

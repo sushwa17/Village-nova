@@ -4,6 +4,9 @@ class WeatherHourModel {
   final int rainProb;
   final String condition;
   final String icon;
+  final double rainfallMm;
+  final double windSpeedKmh;
+  final bool spraySafe;
 
   const WeatherHourModel({
     required this.time,
@@ -11,6 +14,9 @@ class WeatherHourModel {
     required this.rainProb,
     required this.condition,
     required this.icon,
+    this.rainfallMm = 0.0,
+    this.windSpeedKmh = 10.0,
+    this.spraySafe = true,
   });
 
   factory WeatherHourModel.fromJson(Map<String, dynamic> json) {
@@ -20,6 +26,9 @@ class WeatherHourModel {
       rainProb: json['rain_prob'] as int? ?? 0,
       condition: json['condition'] as String? ?? 'Cloudy',
       icon: json['icon'] as String? ?? 'cloudy',
+      rainfallMm: (json['rainfall_mm'] as num?)?.toDouble() ?? 0.0,
+      windSpeedKmh: (json['wind_speed_kmh'] as num?)?.toDouble() ?? 10.0,
+      spraySafe: json['spray_safe'] as bool? ?? true,
     );
   }
 }
@@ -35,6 +44,13 @@ class VillageWeatherModel {
   final String? expectedRainTime;
   final String advisory;
   final List<WeatherHourModel> hourly;
+  final String sprayRiskLevel;
+  final String sprayAction;
+  final String bestSprayWindow;
+  final String irrigationAction;
+  final List<String> triggerReasons;
+  final String? cropStageNote;
+  final String source;
 
   const VillageWeatherModel({
     required this.villageName,
@@ -47,6 +63,13 @@ class VillageWeatherModel {
     this.expectedRainTime,
     required this.advisory,
     required this.hourly,
+    this.sprayRiskLevel = 'HIGH_RISK',
+    this.sprayAction = 'HOLD_SPRAY',
+    this.bestSprayWindow = 'Tomorrow 6:00 AM - 10:00 AM',
+    this.irrigationAction = 'HOLD_IRRIGATION',
+    this.triggerReasons = const [],
+    this.cropStageNote,
+    this.source = 'Open-Meteo High-Resolution Rural Grid',
   });
 
   factory VillageWeatherModel.fromJson(Map<String, dynamic> json) {
@@ -64,6 +87,16 @@ class VillageWeatherModel {
               ?.map((e) => WeatherHourModel.fromJson(e as Map<String, dynamic>))
               .toList() ??
           [],
+      sprayRiskLevel: json['spray_risk_level'] as String? ?? 'HIGH_RISK',
+      sprayAction: json['spray_action'] as String? ?? 'HOLD_SPRAY',
+      bestSprayWindow: json['best_spray_window'] as String? ?? 'Tomorrow 6:00 AM - 10:00 AM',
+      irrigationAction: json['irrigation_action'] as String? ?? 'HOLD_IRRIGATION',
+      triggerReasons: (json['trigger_reasons'] as List<dynamic>?)
+              ?.map((e) => e.toString())
+              .toList() ??
+          [],
+      cropStageNote: json['crop_stage_note'] as String?,
+      source: json['source'] as String? ?? 'Open-Meteo High-Resolution Rural Grid',
     );
   }
 }
@@ -137,11 +170,11 @@ class VillageUpdateModel {
       villageId: json['village_id'] as String? ?? '',
       title: json['title'] as String? ?? '',
       content: json['content'] as String? ?? '',
-      category: json['category'] as String? ?? 'general',
+      category: json['category'] as String? ?? 'panchayat',
       isEmergency: json['is_emergency'] as bool? ?? false,
       isVerified: json['is_verified'] as bool? ?? true,
-      authorName: json['author_name'] as String? ?? 'Panchayat Secretary',
-      authorRole: json['author_role'] as String? ?? 'Gram Panchayat',
+      authorName: json['author_name'] as String? ?? 'Gram Panchayat',
+      authorRole: json['author_role'] as String? ?? 'Admin',
       createdAt: json['created_at'] as String? ?? '',
     );
   }

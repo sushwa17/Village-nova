@@ -1,7 +1,6 @@
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:villagenova/models/village_feed_model.dart';
 import 'package:villagenova/core/network/api_client.dart';
-import 'package:villagenova/providers/auth_provider.dart';
 
 enum VillageStatus { initial, loading, loaded, error }
 
@@ -9,6 +8,7 @@ class VillageState {
   final VillageStatus status;
   final VillageFeedModel? feed;
   final String selectedCategory; // 'all', 'panchayat', 'agriculture', 'health', 'emergency'
+  final String selectedScenario; // 'default', 'clear_morning', 'high_wind', 'dry_spell'
   final bool isPostingNotice;
   final String? errorMessage;
 
@@ -16,6 +16,7 @@ class VillageState {
     this.status = VillageStatus.initial,
     this.feed,
     this.selectedCategory = 'all',
+    this.selectedScenario = 'default',
     this.isPostingNotice = false,
     this.errorMessage,
   });
@@ -24,6 +25,7 @@ class VillageState {
     VillageStatus? status,
     VillageFeedModel? feed,
     String? selectedCategory,
+    String? selectedScenario,
     bool? isPostingNotice,
     String? errorMessage,
   }) {
@@ -31,6 +33,7 @@ class VillageState {
       status: status ?? this.status,
       feed: feed ?? this.feed,
       selectedCategory: selectedCategory ?? this.selectedCategory,
+      selectedScenario: selectedScenario ?? this.selectedScenario,
       isPostingNotice: isPostingNotice ?? this.isPostingNotice,
       errorMessage: errorMessage ?? this.errorMessage,
     );
@@ -74,6 +77,51 @@ class VillageNotifier extends StateNotifier<VillageState> {
     _setFallbackFeed();
   }
 
+  Future<void> simulateWeatherScenario(
+    String scenario, {
+    String villageId = '3fa85f64-5717-4562-b3fc-2c963f66afa6',
+  }) async {
+    state = state.copyWith(selectedScenario: scenario);
+    try {
+      final response = await apiClient.dio.get(
+        '/villages/$villageId/weather',
+        queryParameters: {'scenario': scenario},
+      );
+      if (response.statusCode == 200 && response.data['data'] != null && state.feed != null) {
+        final weatherModel = VillageWeatherModel.fromJson(response.data['data'] as Map<String, dynamic>);
+        final updatedFeed = VillageFeedModel(
+          villageId: state.feed!.villageId,
+          villageName: state.feed!.villageName,
+          mandal: state.feed!.mandal,
+          district: state.feed!.district,
+          activeAlertsCount: state.feed!.activeAlertsCount,
+          weather: weatherModel,
+          mandiPrices: state.feed!.mandiPrices,
+          bulletins: state.feed!.bulletins,
+        );
+        state = state.copyWith(feed: updatedFeed);
+        return;
+      }
+    } catch (_) {
+      // Offline simulated fallback
+    }
+
+    if (state.feed != null) {
+      final localWeather = _offlineWeatherForScenario(scenario, state.feed!.villageName);
+      final updatedFeed = VillageFeedModel(
+        villageId: state.feed!.villageId,
+        villageName: state.feed!.villageName,
+        mandal: state.feed!.mandal,
+        district: state.feed!.district,
+        activeAlertsCount: state.feed!.activeAlertsCount,
+        weather: localWeather,
+        mandiPrices: state.feed!.mandiPrices,
+        bulletins: state.feed!.bulletins,
+      );
+      state = state.copyWith(feed: updatedFeed);
+    }
+  }
+
   Future<bool> postBulletin({
     required String title,
     required String content,
@@ -96,7 +144,6 @@ class VillageNotifier extends StateNotifier<VillageState> {
       );
     } catch (_) {}
 
-    // Optimistically prepend locally
     if (state.feed != null) {
       final newBulletin = VillageUpdateModel(
         id: 'bul_${DateTime.now().millisecondsSinceEpoch}',
@@ -133,9 +180,77 @@ class VillageNotifier extends StateNotifier<VillageState> {
     return true;
   }
 
-  void _setFallbackFeed() {
-    final weather = VillageWeatherModel(
-      villageName: 'Ananthagiri',
+  VillageWeatherModel _offlineWeatherForScenario(String scenario, String villageName) {
+    if (scenario == 'clear_morning') {
+      return VillageWeatherModel(
+        villageName: villageName,
+        tempC: 27.5,
+        condition: 'Clear & Calm Morning',
+        humidityPct: 64,
+        windSpeedKmh: 8.2,
+        rainProbPct: 10,
+        rainfallMm: 0.0,
+        sprayRiskLevel: 'SAFE',
+        sprayAction: 'SPRAY_ALLOWED',
+        bestSprayWindow: 'Safe Today (7:00 AM - 3:00 PM)',
+        irrigationAction: 'NORMAL_MONITORING',
+        advisory: 'Optimal calm weather (8.2 km/h wind, 10% rain risk). Safe window for foliar spraying until 3:00 PM.',
+        hourly: const [
+          WeatherHourModel(time: '7:00 AM', tempC: 24.0, rainProb: 5, condition: 'Clear', icon: 'sunny', spraySafe: true),
+          WeatherHourModel(time: '9:00 AM', tempC: 27.5, rainProb: 10, condition: 'Calm', icon: 'sunny', spraySafe: true),
+          WeatherHourModel(time: '11:00 AM', tempC: 30.0, rainProb: 10, condition: 'Sunny', icon: 'partly_cloudy', spraySafe: true),
+          WeatherHourModel(time: '1:00 PM', tempC: 31.5, rainProb: 15, condition: 'Partly Cloudy', icon: 'partly_cloudy', spraySafe: true),
+          WeatherHourModel(time: '3:00 PM', tempC: 31.0, rainProb: 15, condition: 'Clouds', icon: 'cloudy', spraySafe: true),
+        ],
+      );
+    } else if (scenario == 'high_wind') {
+      return VillageWeatherModel(
+        villageName: villageName,
+        tempC: 32.0,
+        condition: 'Gusty Crosswinds',
+        humidityPct: 58,
+        windSpeedKmh: 22.5,
+        rainProbPct: 15,
+        rainfallMm: 0.0,
+        sprayRiskLevel: 'HIGH_RISK',
+        sprayAction: 'HOLD_SPRAY',
+        bestSprayWindow: 'Tomorrow Dawn 5:45 AM - 8:30 AM',
+        irrigationAction: 'NORMAL_MONITORING',
+        advisory: 'High wind drift alert (22.5 km/h). Hold spraying to avoid off-target spray drift.',
+        hourly: const [
+          WeatherHourModel(time: '2:00 PM', tempC: 32.0, rainProb: 15, condition: 'Windy', icon: 'cloudy', windSpeedKmh: 22.5, spraySafe: false),
+          WeatherHourModel(time: '4:00 PM', tempC: 31.0, rainProb: 15, condition: 'Gusty', icon: 'cloudy', windSpeedKmh: 24.0, spraySafe: false),
+          WeatherHourModel(time: '6:00 PM', tempC: 28.5, rainProb: 10, condition: 'Breezy', icon: 'partly_cloudy', windSpeedKmh: 17.5, spraySafe: false),
+          WeatherHourModel(time: '8:00 PM', tempC: 26.0, rainProb: 10, condition: 'Calm', icon: 'sunny', windSpeedKmh: 11.0, spraySafe: true),
+          WeatherHourModel(time: '6:00 AM', tempC: 23.5, rainProb: 5, condition: 'Calm Dawn', icon: 'sunny', windSpeedKmh: 7.5, spraySafe: true),
+        ],
+      );
+    } else if (scenario == 'dry_spell') {
+      return VillageWeatherModel(
+        villageName: villageName,
+        tempC: 35.2,
+        condition: 'Hot & Dry Spell',
+        humidityPct: 42,
+        windSpeedKmh: 11.0,
+        rainProbPct: 5,
+        rainfallMm: 0.0,
+        sprayRiskLevel: 'SAFE',
+        sprayAction: 'SPRAY_ALLOWED',
+        bestSprayWindow: 'Early Morning 6:00 AM - 9:00 AM',
+        irrigationAction: 'LIGHT_PROTECTIVE_IRRIGATION',
+        advisory: 'Dry spell conditions (0mm rain). Schedule protective irrigation for sensitive flowering/pod stages.',
+        hourly: const [
+          WeatherHourModel(time: '2:00 PM', tempC: 35.2, rainProb: 5, condition: 'Hot Sun', icon: 'sunny', spraySafe: true),
+          WeatherHourModel(time: '4:00 PM', tempC: 34.0, rainProb: 5, condition: 'Warm', icon: 'sunny', spraySafe: true),
+          WeatherHourModel(time: '6:00 PM', tempC: 30.5, rainProb: 10, condition: 'Clear', icon: 'partly_cloudy', spraySafe: true),
+          WeatherHourModel(time: '8:00 PM', tempC: 28.0, rainProb: 5, condition: 'Clear', icon: 'sunny', spraySafe: true),
+          WeatherHourModel(time: '6:00 AM', tempC: 24.5, rainProb: 5, condition: 'Cool Dawn', icon: 'sunny', spraySafe: true),
+        ],
+      );
+    }
+
+    return VillageWeatherModel(
+      villageName: villageName,
       tempC: 29.4,
       condition: 'Scattered Rain & Thunderstorms',
       humidityPct: 82,
@@ -143,17 +258,25 @@ class VillageNotifier extends StateNotifier<VillageState> {
       rainProbPct: 85,
       rainfallMm: 14.0,
       expectedRainTime: '6:00 PM today',
+      sprayRiskLevel: 'HIGH_RISK',
+      sprayAction: 'HOLD_SPRAY',
+      bestSprayWindow: 'Tomorrow 6:00 AM - 10:00 AM (Post-Rain Dry Window)',
+      irrigationAction: 'HOLD_IRRIGATION',
       advisory: 'Heavy rain (14mm) expected around 6:00 PM. Conclude pesticide spray and field hoeing by 4:30 PM. Keep drainage channels unobstructed.',
       hourly: const [
-        WeatherHourModel(time: '2:00 PM', tempC: 31.0, rainProb: 20, condition: 'Partly Cloudy', icon: 'partly_cloudy'),
-        WeatherHourModel(time: '4:00 PM', tempC: 29.5, rainProb: 45, condition: 'Overcast Clouds', icon: 'cloudy'),
-        WeatherHourModel(time: '6:00 PM', tempC: 26.0, rainProb: 90, condition: 'Thunderstorm', icon: 'thunderstorm'),
-        WeatherHourModel(time: '8:00 PM', tempC: 24.5, rainProb: 70, condition: 'Showers', icon: 'rain'),
-        WeatherHourModel(time: '10:00 PM', tempC: 24.0, rainProb: 30, condition: 'Cloudy', icon: 'cloudy'),
+        WeatherHourModel(time: '2:00 PM', tempC: 31.0, rainProb: 20, condition: 'Partly Cloudy', icon: 'partly_cloudy', spraySafe: true),
+        WeatherHourModel(time: '4:00 PM', tempC: 29.5, rainProb: 45, condition: 'Overcast Clouds', icon: 'cloudy', spraySafe: false),
+        WeatherHourModel(time: '6:00 PM', tempC: 26.0, rainProb: 90, condition: 'Thunderstorm', icon: 'thunderstorm', rainfallMm: 10.5, windSpeedKmh: 21.0, spraySafe: false),
+        WeatherHourModel(time: '8:00 PM', tempC: 24.5, rainProb: 70, condition: 'Showers', icon: 'rain', rainfallMm: 3.0, spraySafe: false),
+        WeatherHourModel(time: '10:00 PM', tempC: 24.0, rainProb: 30, condition: 'Cloudy', icon: 'cloudy', spraySafe: true),
       ],
     );
+  }
 
-    final mandi = const [
+  void _setFallbackFeed() {
+    final weather = _offlineWeatherForScenario('default', 'Ananthagiri');
+
+    const mandi = [
       MandiPriceModel(
         commodity: 'Soybean (JS-335 / Yellow)',
         market: 'Vikarabad APMC',

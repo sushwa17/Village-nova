@@ -31,6 +31,9 @@ class WeatherHourOut(BaseModel):
     rain_prob: int
     condition: str
     icon: str
+    rainfall_mm: float = 0.0
+    wind_speed_kmh: float = 10.0
+    spray_safe: bool = True
 
 
 class VillageWeatherOut(BaseModel):
@@ -44,6 +47,32 @@ class VillageWeatherOut(BaseModel):
     expected_rain_time: Optional[str] = None
     advisory: str
     hourly: List[WeatherHourOut] = []
+    latitude: float = 17.31
+    longitude: float = 77.86
+    source: str = "Open-Meteo High-Resolution Rural Grid (Calibrated)"
+    spray_risk_level: str = "HIGH_RISK"  # SAFE, CAUTION, HIGH_RISK
+    spray_action: str = "HOLD_SPRAY"  # SPRAY_ALLOWED, SPRAY_WITH_CAUTION, HOLD_SPRAY
+    best_spray_window: str = "Tomorrow 6:00 AM - 10:00 AM"
+    irrigation_action: str = "HOLD_IRRIGATION"  # HOLD_IRRIGATION, LIGHT_PROTECTIVE_IRRIGATION, NORMAL_MONITORING
+    trigger_reasons: List[str] = Field(default_factory=list)
+    crop_stage_note: Optional[str] = None
+
+
+class SprayAdvisoryOut(BaseModel):
+    village_id: str
+    village_name: str
+    crop_name: str
+    crop_stage: str
+    scenario: str = "default"
+    spray_risk_level: str  # SAFE, CAUTION, HIGH_RISK
+    spray_action: str  # SPRAY_ALLOWED, SPRAY_WITH_CAUTION, HOLD_SPRAY
+    is_spray_safe_now: bool
+    best_spray_window: str
+    irrigation_action: str
+    rain_fast_hours_required: int = 4
+    trigger_reasons: List[str] = Field(default_factory=list)
+    advisory_summary: str
+    weather: VillageWeatherOut
 
 
 class MandiPriceOut(BaseModel):

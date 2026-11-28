@@ -1095,58 +1095,69 @@
             </div>
           </div>
 
-          <!-- Weather Intelligence Card -->
-          <div class="p-3.5 bg-sky-50/80 border border-sky-200 rounded-2xl shadow-2xs space-y-2.5">
+          <!-- Weather Intelligence & Dynamic Spray Trigger Card (Week 13) -->
+          <div id="village-weather-card" class="p-3.5 bg-sky-50/80 border border-sky-200 rounded-2xl shadow-2xs space-y-2.5">
             <div class="flex items-center justify-between">
               <div class="flex items-center gap-2">
-                <span class="text-2xl">⛈️</span>
+                <span id="weather-icon" class="text-2xl">⛈️</span>
                 <div>
                   <div class="flex items-baseline gap-1.5">
-                    <span class="text-xl font-extrabold text-sky-950">29.4°C</span>
-                    <span class="text-[11px] font-semibold text-sky-700">Scattered Rain</span>
+                    <span id="weather-temp" class="text-xl font-extrabold text-sky-950">29.4°C</span>
+                    <span id="weather-cond" class="text-[11px] font-semibold text-sky-700">Scattered Rain</span>
                   </div>
-                  <p class="text-[10px] text-sky-600">Humidity 82% • Wind 14.5 km/h</p>
+                  <p id="weather-meta" class="text-[10px] text-sky-600">Humidity 82% • Wind 14.5 km/h</p>
                 </div>
               </div>
-              <div class="text-right bg-white/80 px-2.5 py-1.5 rounded-xl border border-sky-100">
-                <p class="text-xs font-extrabold text-sky-900">85% Rain</p>
-                <p class="text-[10px] text-sky-600 font-medium">14 mm at 6 PM</p>
+              <div class="text-right">
+                <span id="spray-action-badge" class="inline-block px-2 py-0.5 rounded-full text-[9px] font-extrabold bg-rose-600 text-white uppercase tracking-wider">HOLD SPRAY</span>
+                <p id="weather-rain-badge" class="text-[10px] text-sky-800 font-bold mt-1">85% Rain • 14 mm</p>
               </div>
             </div>
 
-            <div class="p-2.5 bg-white rounded-xl border border-sky-100 flex items-start gap-2 text-[11px]">
-              <span class="text-sm">💡</span>
-              <p class="text-sky-900 leading-snug">
-                <strong>Agronomic Advisory:</strong> Heavy rain (14mm) expected around 6:00 PM. Conclude pesticide spray and field hoeing by 4:30 PM.
+            <!-- Dynamic Scenario Simulator Bar -->
+            <div class="flex flex-wrap items-center gap-1 pt-0.5">
+              <button onclick="simulateWeatherScenario('default')" id="wscen-default" class="wscen-btn px-2 py-1 rounded-lg text-[9px] font-extrabold bg-sky-700 text-white">⛈️ 6 PM Storm</button>
+              <button onclick="simulateWeatherScenario('clear_morning')" id="wscen-clear_morning" class="wscen-btn px-2 py-1 rounded-lg text-[9px] font-semibold bg-white border border-sky-200 text-sky-900">☀️ Clear Morning</button>
+              <button onclick="simulateWeatherScenario('high_wind')" id="wscen-high_wind" class="wscen-btn px-2 py-1 rounded-lg text-[9px] font-semibold bg-white border border-sky-200 text-sky-900">💨 High Wind</button>
+              <button onclick="simulateWeatherScenario('dry_spell')" id="wscen-dry_spell" class="wscen-btn px-2 py-1 rounded-lg text-[9px] font-semibold bg-white border border-sky-200 text-sky-900">🏜️ Dry Spell</button>
+            </div>
+
+            <div class="p-2.5 bg-white rounded-xl border border-sky-100 space-y-1 text-[11px]">
+              <div class="flex items-center justify-between">
+                <span id="spray-best-window" class="font-extrabold text-rose-700 text-[10px]">🕒 Best Spray: Tomorrow 6:00 AM - 10:00 AM</span>
+                <span id="irrigation-trigger-pill" class="px-1.5 py-0.5 rounded bg-amber-100 text-amber-900 text-[9px] font-bold">Hold Irrigation</span>
+              </div>
+              <p id="weather-advisory-text" class="text-sky-900 leading-snug">
+                <strong>IMD Spray Trigger:</strong> Heavy rain (14mm) expected around 6:00 PM. Hold foliar spraying to prevent 3-4h rain-fastness wash-off.
               </p>
             </div>
 
             <!-- Hourly Weather Strip -->
-            <div class="flex items-center gap-1.5 overflow-x-auto pb-1">
-              <div class="px-2 py-1.5 bg-white rounded-lg border border-sky-100 text-center min-w-[56px]">
+            <div id="weather-hourly-strip" class="flex items-center gap-1.5 overflow-x-auto pb-1">
+              <div class="px-2 py-1.5 bg-white rounded-lg border border-emerald-200 text-center min-w-[56px]">
                 <p class="text-[9px] text-slate-400 font-semibold">2:00 PM</p>
                 <p class="text-xs font-bold text-slate-800">31°</p>
-                <p class="text-[9px] text-sky-600 font-bold">20% 💧</p>
+                <p class="text-[9px] text-emerald-700 font-bold">Safe ✓</p>
               </div>
-              <div class="px-2 py-1.5 bg-white rounded-lg border border-sky-100 text-center min-w-[56px]">
+              <div class="px-2 py-1.5 bg-white rounded-lg border border-rose-200 text-center min-w-[56px]">
                 <p class="text-[9px] text-slate-400 font-semibold">4:00 PM</p>
                 <p class="text-xs font-bold text-slate-800">29°</p>
-                <p class="text-[9px] text-sky-600 font-bold">45% 💧</p>
+                <p class="text-[9px] text-rose-700 font-bold">45% ⚠️</p>
               </div>
-              <div class="px-2 py-1.5 bg-sky-200/80 rounded-lg border border-sky-300 text-center min-w-[56px]">
-                <p class="text-[9px] text-sky-900 font-bold">6:00 PM</p>
-                <p class="text-xs font-extrabold text-sky-950">26°</p>
-                <p class="text-[9px] text-sky-800 font-extrabold">90% ⛈️</p>
+              <div class="px-2 py-1.5 bg-rose-100 rounded-lg border border-rose-300 text-center min-w-[56px]">
+                <p class="text-[9px] text-rose-900 font-bold">6:00 PM</p>
+                <p class="text-xs font-extrabold text-rose-950">26°</p>
+                <p class="text-[9px] text-rose-800 font-extrabold">90% ⛈️</p>
               </div>
-              <div class="px-2 py-1.5 bg-white rounded-lg border border-sky-100 text-center min-w-[56px]">
+              <div class="px-2 py-1.5 bg-rose-50 rounded-lg border border-rose-200 text-center min-w-[56px]">
                 <p class="text-[9px] text-slate-400 font-semibold">8:00 PM</p>
                 <p class="text-xs font-bold text-slate-800">24°</p>
-                <p class="text-[9px] text-sky-600 font-bold">70% 💧</p>
+                <p class="text-[9px] text-rose-700 font-bold">70% 💧</p>
               </div>
-              <div class="px-2 py-1.5 bg-white rounded-lg border border-sky-100 text-center min-w-[56px]">
+              <div class="px-2 py-1.5 bg-white rounded-lg border border-emerald-200 text-center min-w-[56px]">
                 <p class="text-[9px] text-slate-400 font-semibold">10:00 PM</p>
                 <p class="text-xs font-bold text-slate-800">24°</p>
-                <p class="text-[9px] text-sky-600 font-bold">30% 💧</p>
+                <p class="text-[9px] text-emerald-700 font-bold">Safe ✓</p>
               </div>
             </div>
           </div>
@@ -2381,6 +2392,130 @@
 
     function promptFieldPhoto() {
       toggleLeafDoctorModal();
+    }
+
+    // Week 13: Hyperlocal Weather & Dynamic Spray Trigger Simulator
+    const WEATHER_SCENARIOS = {
+      default: {
+        icon: '⛈️',
+        temp: '29.4°C',
+        cond: 'Scattered Rain',
+        meta: 'Humidity 82% • Wind 14.5 km/h',
+        action: 'HOLD SPRAY',
+        actionClass: 'inline-block px-2 py-0.5 rounded-full text-[9px] font-extrabold bg-rose-600 text-white uppercase tracking-wider',
+        rainBadge: '85% Rain • 14 mm',
+        bestWindow: '🕒 Best Spray: Tomorrow 6:00 AM - 10:00 AM',
+        windowClass: 'font-extrabold text-rose-700 text-[10px]',
+        irrigation: 'Hold Irrigation',
+        irrigationClass: 'px-1.5 py-0.5 rounded bg-amber-100 text-amber-900 text-[9px] font-bold',
+        advisory: '<strong>IMD Spray Trigger:</strong> Heavy rain (14mm) expected around 6:00 PM. Hold foliar spraying to prevent 3-4h rain-fastness wash-off.',
+        hourly: [
+          { t: '2:00 PM', temp: '31°', safe: true, sub: 'Safe ✓' },
+          { t: '4:00 PM', temp: '29°', safe: false, sub: '45% ⚠️' },
+          { t: '6:00 PM', temp: '26°', safe: false, sub: '90% ⛈️' },
+          { t: '8:00 PM', temp: '24°', safe: false, sub: '70% 💧' },
+          { t: '10:00 PM', temp: '24°', safe: true, sub: 'Safe ✓' }
+        ]
+      },
+      clear_morning: {
+        icon: '☀️',
+        temp: '27.5°C',
+        cond: 'Clear & Calm',
+        meta: 'Humidity 64% • Wind 8.2 km/h',
+        action: 'SPRAY SAFE',
+        actionClass: 'inline-block px-2 py-0.5 rounded-full text-[9px] font-extrabold bg-emerald-600 text-white uppercase tracking-wider',
+        rainBadge: '10% Rain • 0 mm',
+        bestWindow: '🕒 Best Spray: Safe Today (7:00 AM - 3:00 PM)',
+        windowClass: 'font-extrabold text-emerald-700 text-[10px]',
+        irrigation: 'Normal Monitor',
+        irrigationClass: 'px-1.5 py-0.5 rounded bg-emerald-100 text-emerald-900 text-[9px] font-bold',
+        advisory: '<strong>IMD Spray Trigger:</strong> Calm wind (8.2 km/h) and dry skies ensure high foliar adhesion for NSKE or nutrients.',
+        hourly: [
+          { t: '7:00 AM', temp: '24°', safe: true, sub: 'Safe ✓' },
+          { t: '9:00 AM', temp: '27°', safe: true, sub: 'Safe ✓' },
+          { t: '11:00 AM', temp: '30°', safe: true, sub: 'Safe ✓' },
+          { t: '1:00 PM', temp: '31°', safe: true, sub: 'Safe ✓' },
+          { t: '3:00 PM', temp: '31°', safe: true, sub: 'Safe ✓' }
+        ]
+      },
+      high_wind: {
+        icon: '💨',
+        temp: '32.0°C',
+        cond: 'Gusty Crosswinds',
+        meta: 'Humidity 58% • Wind 22.5 km/h',
+        action: 'HOLD SPRAY',
+        actionClass: 'inline-block px-2 py-0.5 rounded-full text-[9px] font-extrabold bg-amber-600 text-white uppercase tracking-wider',
+        rainBadge: '15% Rain • 0 mm',
+        bestWindow: '🕒 Best Spray: Tomorrow 5:45 AM - 8:30 AM',
+        windowClass: 'font-extrabold text-amber-800 text-[10px]',
+        irrigation: 'Normal Monitor',
+        irrigationClass: 'px-1.5 py-0.5 rounded bg-slate-100 text-slate-800 text-[9px] font-bold',
+        advisory: '<strong>Wind Drift Trigger:</strong> Surface wind 22.5 km/h exceeds 15 km/h limit. Hold chemical misting to prevent drift.',
+        hourly: [
+          { t: '2:00 PM', temp: '32°', safe: false, sub: '22 km/h 💨' },
+          { t: '4:00 PM', temp: '31°', safe: false, sub: '24 km/h 💨' },
+          { t: '6:00 PM', temp: '28°', safe: false, sub: '17 km/h 💨' },
+          { t: '8:00 PM', temp: '26°', safe: true, sub: 'Safe ✓' },
+          { t: '6:00 AM', temp: '23°', safe: true, sub: 'Safe ✓' }
+        ]
+      },
+      dry_spell: {
+        icon: '🏜️',
+        temp: '35.2°C',
+        cond: 'Hot & Dry Spell',
+        meta: 'Humidity 42% • Wind 11.0 km/h',
+        action: 'SPRAY SAFE',
+        actionClass: 'inline-block px-2 py-0.5 rounded-full text-[9px] font-extrabold bg-emerald-600 text-white uppercase tracking-wider',
+        rainBadge: '5% Rain • 0 mm',
+        bestWindow: '🕒 Best Spray: Early Morning 6 AM - 9 AM',
+        windowClass: 'font-extrabold text-emerald-700 text-[10px]',
+        irrigation: 'Irrigate Flowering',
+        irrigationClass: 'px-1.5 py-0.5 rounded bg-sky-100 text-sky-900 text-[9px] font-bold',
+        advisory: '<strong>Moisture Trigger:</strong> 0mm rain forecast. Provide light protective furrow irrigation if Soybean/Cotton is flowering.',
+        hourly: [
+          { t: '2:00 PM', temp: '35°', safe: true, sub: 'Safe ✓' },
+          { t: '4:00 PM', temp: '34°', safe: true, sub: 'Safe ✓' },
+          { t: '6:00 PM', temp: '30°', safe: true, sub: 'Safe ✓' },
+          { t: '8:00 PM', temp: '28°', safe: true, sub: 'Safe ✓' },
+          { t: '6:00 AM', temp: '24°', safe: true, sub: 'Safe ✓' }
+        ]
+      }
+    };
+
+    function simulateWeatherScenario(key) {
+      const w = WEATHER_SCENARIOS[key] || WEATHER_SCENARIOS.default;
+      document.getElementById('weather-icon').textContent = w.icon;
+      document.getElementById('weather-temp').textContent = w.temp;
+      document.getElementById('weather-cond').textContent = w.cond;
+      document.getElementById('weather-meta').textContent = w.meta;
+      const badge = document.getElementById('spray-action-badge');
+      badge.textContent = w.action;
+      badge.className = w.actionClass;
+      document.getElementById('weather-rain-badge').textContent = w.rainBadge;
+      const bw = document.getElementById('spray-best-window');
+      bw.textContent = w.bestWindow;
+      bw.className = w.windowClass;
+      const irr = document.getElementById('irrigation-trigger-pill');
+      irr.textContent = w.irrigation;
+      irr.className = w.irrigationClass;
+      document.getElementById('weather-advisory-text').innerHTML = w.advisory;
+
+      document.querySelectorAll('.wscen-btn').forEach(btn => {
+        btn.className = 'wscen-btn px-2 py-1 rounded-lg text-[9px] font-semibold bg-white border border-sky-200 text-sky-900';
+      });
+      const active = document.getElementById('wscen-' + key);
+      if (active) active.className = 'wscen-btn px-2 py-1 rounded-lg text-[9px] font-extrabold bg-sky-700 text-white';
+
+      const strip = document.getElementById('weather-hourly-strip');
+      if (strip) {
+        strip.innerHTML = w.hourly.map(h => `
+          <div class="px-2 py-1.5 ${h.safe ? 'bg-white border-emerald-200' : 'bg-rose-50 border-rose-300'} rounded-lg border text-center min-w-[56px]">
+            <p class="text-[9px] text-slate-400 font-semibold">${h.t}</p>
+            <p class="text-xs font-bold text-slate-800">${h.temp}</p>
+            <p class="text-[9px] ${h.safe ? 'text-emerald-700' : 'text-rose-700'} font-bold">${h.sub}</p>
+          </div>
+        `).join('');
+      }
     }
 
     // Onboarding Multi-Step Controller

@@ -13,11 +13,12 @@ from app.schemas.village import (
     VillageUpdateOut,
     VillageUpdateCreate,
     VillageWeatherOut,
-    WeatherHourOut,
+    SprayAdvisoryOut,
     MandiPriceOut,
     VillageFeedOut,
 )
 from app.schemas.common import APIResponse
+from app.services.weather import get_localized_weather, get_dynamic_spray_advisory
 
 router = APIRouter(prefix="/villages", tags=["Villages"])
 
@@ -114,25 +115,12 @@ _DEMO_BULLETINS: List[dict] = [
 ]
 
 
-def _get_demo_weather(village_name: str = "Ananthagiri") -> VillageWeatherOut:
-    return VillageWeatherOut(
-        village_name=village_name,
-        temp_c=29.4,
-        condition="Scattered Rain & Thunderstorms",
-        humidity_pct=82,
-        wind_speed_kmh=14.5,
-        rain_prob_pct=85,
-        rainfall_mm=14.0,
-        expected_rain_time="6:00 PM today",
-        advisory="Heavy rain (14mm) expected around 6:00 PM. Conclude pesticide spray and field hoeing by 4:30 PM. Keep drainage channels unobstructed.",
-        hourly=[
-            WeatherHourOut(time="2:00 PM", temp_c=31.0, rain_prob=20, condition="Partly Cloudy", icon="partly_cloudy"),
-            WeatherHourOut(time="4:00 PM", temp_c=29.5, rain_prob=45, condition="Overcast Clouds", icon="cloudy"),
-            WeatherHourOut(time="6:00 PM", temp_c=26.0, rain_prob=90, condition="Thunderstorm & Heavy Rain", icon="thunderstorm"),
-            WeatherHourOut(time="8:00 PM", temp_c=24.5, rain_prob=70, condition="Light Showers", icon="rain"),
-            WeatherHourOut(time="10:00 PM", temp_c=24.0, rain_prob=30, condition="Cloudy", icon="cloudy"),
-        ],
-    )
+def _resolve_village_metadata(village_id: str) -> tuple[str, str, str]:
+    """Resolves village name, mandal, and district from curated seeds."""
+    for v in DEFAULT_VILLAGES:
+        if str(v["id"]) == village_id:
+            return v["name"], v["mandal"], v["district"]
+    return "Ananthagiri", "Vikarabad", "Vikarabad"
 
 
 def _get_demo_mandi_prices() -> List[MandiPriceOut]:
@@ -240,22 +228,11 @@ async def get_village_feed(
     db: AsyncSession = Depends(get_db),
 ):
     """
-    Consolidated Village Feed: Combines Hyperlocal Weather, APMC Mandi commodity rates,
-    and official Panchayat/KVK bulletins for a rich community experience.
+    Consolidated Village Feed: Combines Hyperlocal Weather + Spray Triggers, APMC Mandi rates,
+    and official Panchayat/KVK bulletins.
     """
-    v_name = "Ananthagiri"
-    mandal = "Vikarabad"
-    district = "Vikarabad"
-
-    # Match village name from seeds if present
-    for v in DEFAULT_VILLAGES:
-        if str(v["id"]) == village_id:
-            v_name = v["name"]
-            mandal = v["mandal"]
-            district = v["district"]
-            break
-
-    weather = _get_demo_weather(v_name)
+    v_name, mandal, district = _resolve_village_metadata(village_id)
+    weather = await get_localized_weather(village_name=v_name)
     mandi = _get_demo_mandi_prices()
 
     # Query DB bulletins if available, else in-memory demo bulletins
@@ -354,7 +331,6 @@ async def post_village_bulletin(
         "created_at": now,
     }
 
-    # Prepend to demo in-memory storage so it is immediately reflected
     _DEMO_BULLETINS.insert(0, item_dict)
 
     if db:
@@ -384,20 +360,50 @@ async def post_village_bulletin(
 @router.get("/{village_id}/weather", response_model=APIResponse[VillageWeatherOut])
 async def get_village_weather(
     village_id: str,
+    crop_name: str = Query("Soybean", description="Active crop name for stage-aware triggers"),
+    crop_stage: str = Query("vegetative", description="Active crop stage (e.g. vegetative, flowering)"),
+    scenario: Optional[str] = Query(None, description="Optional forecast scenario: default, clear_morning, high_wind, dry_spell"),
 ):
     """
-    Returns Hyperlocal Weather Intelligence: current conditions, rainfall expectation, and actionable agricultural advisories.
+    Returns Hyperlocal Weather Intelligence: Open-Meteo or calibrated rural forecast,
+    hourly precipitation & wind windows, and dynamic IMD Spray Advisory triggers.
     """
-    v_name = "Ananthagiri"
-    for v in DEFAULT_VILLAGES:
-        if str(v["id"]) == village_id:
-            v_name = v["name"]
-            break
-
-    weather = _get_demo_weather(v_name)
+    v_name, _, _ = _resolve_village_metadata(village_id)
+    weather = await get_localized_weather(
+        village_name=v_name,
+        crop_name=crop_name,
+        crop_stage=crop_stage,
+        scenario=scenario,
+    )
     return APIResponse(
-        message="Weather forecast fetched successfully",
+        message="Weather forecast and spray triggers fetched successfully",
         data=weather,
+    )
+
+
+@router.get("/{village_id}/spray-advisory", response_model=APIResponse[SprayAdvisoryOut])
+async def get_village_spray_advisory(
+    village_id: str,
+    crop_name: str = Query("Soybean", description="Crop name (e.g. Soybean, Cotton)"),
+    crop_stage: str = Query("vegetative", description="Phenological crop stage"),
+    scenario: Optional[str] = Query(None, description="Forecast scenario: default, clear_morning, high_wind, dry_spell"),
+):
+    """
+    Week 13 Dynamic Spray & Irrigation Advisory Trigger Endpoint:
+    Evaluates IMD 3-4 hour rain-fastness, surface wind drift (>15 km/h), and flowering
+    pollinator protection rules to return SAFE vs HOLD_SPRAY actions and optimal windows.
+    """
+    v_name, _, _ = _resolve_village_metadata(village_id)
+    advisory = await get_dynamic_spray_advisory(
+        village_id=village_id,
+        village_name=v_name,
+        crop_name=crop_name,
+        crop_stage=crop_stage,
+        scenario=scenario,
+    )
+    return APIResponse(
+        message="Dynamic spray advisory evaluated successfully",
+        data=advisory,
     )
 
 

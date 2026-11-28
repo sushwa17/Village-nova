@@ -10,6 +10,7 @@ from app.models.resident import ResidentProfile
 from app.models.farm import Farm
 from app.schemas.home import HomeDashboardPayload, WeatherSummary, TodayActionItem, ProgressSummary
 from app.schemas.common import APIResponse
+from app.services.weather import get_localized_weather
 
 router = APIRouter(prefix="/home", tags=["Home Dashboard"])
 
@@ -21,7 +22,7 @@ async def get_home_dashboard(
 ):
     """
     Returns aggregated ready-to-render payload for the Flutter Home Screen:
-    Greeting, location, weather advisory, today's actions, and progress stats.
+    Greeting, location, hyperlocal weather & spray advisory, today's actions, and progress stats.
     """
     profile = None
     if db:
@@ -43,11 +44,13 @@ async def get_home_dashboard(
 
     name = profile.full_name if profile else "Ravi"
     village_name = profile.village.name if profile and profile.village else "Ananthagiri"
-    crop_name = (
-        profile.farms[0].crops[0].crop_name
+    active_crop = (
+        profile.farms[0].crops[0]
         if profile and profile.farms and profile.farms[0].crops
-        else "Soybean"
+        else None
     )
+    crop_name = active_crop.crop_name if active_crop else "Soybean"
+    crop_stage = active_crop.current_stage if active_crop else "vegetative"
 
     # Dynamic actions from resident tasks in DB
     if profile and profile.tasks:
@@ -81,7 +84,6 @@ async def get_home_dashboard(
             percentage=pct,
         )
     else:
-        # Contextual default actions
         actions = [
             TodayActionItem(
                 id="act_1",
@@ -111,11 +113,21 @@ async def get_home_dashboard(
             percentage=33,
         )
 
+    loc_weather = await get_localized_weather(
+        village_name=village_name,
+        crop_name=crop_name,
+        crop_stage=crop_stage,
+    )
+    headline = (
+        f"Rain Expected ({loc_weather.expected_rain_time})"
+        if loc_weather.expected_rain_time
+        else f"{loc_weather.condition} • {loc_weather.spray_action.replace('_', ' ').title()}"
+    )
     weather = WeatherSummary(
-        headline="Rain Expected Today (6:00 PM)",
-        temperature_c=29.0,
-        rainfall_mm=14.0,
-        advisory=f"14mm forecast in {village_name} mandal. Avoid evening irrigation and spraying operations."
+        headline=headline,
+        temperature_c=loc_weather.temp_c,
+        rainfall_mm=loc_weather.rainfall_mm,
+        advisory=f"{loc_weather.advisory} (Best spray window: {loc_weather.best_spray_window})",
     )
 
     payload = HomeDashboardPayload(
