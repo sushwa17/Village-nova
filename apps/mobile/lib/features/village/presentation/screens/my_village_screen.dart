@@ -215,6 +215,12 @@ class _MyVillageScreenState extends ConsumerState<MyVillageScreen> {
   }
 
   Widget _buildWeatherCard(VillageWeatherModel weather, String selectedScenario) {
+    const scenarios = [
+      {'key': 'default', 'label': '6 PM Storm'},
+      {'key': 'clear_morning', 'label': 'Clear Morning'},
+      {'key': 'high_wind', 'label': 'High Wind'},
+      {'key': 'dry_spell', 'label': 'Dry Spell'},
+    ];
     final isSafe = weather.sprayAction == 'SPRAY_ALLOWED';
     final isHold = weather.sprayAction == 'HOLD_SPRAY';
     final sprayColor = isSafe
@@ -305,12 +311,7 @@ class _MyVillageScreenState extends ConsumerState<MyVillageScreen> {
           // Scenario Switcher Chips
           Wrap(
             spacing: 6,
-            children: const [
-              {'key': 'default', 'label': '6 PM Storm'},
-              {'key': 'clear_morning', 'label': 'Clear Morning'},
-              {'key': 'high_wind', 'label': 'High Wind'},
-              {'key': 'dry_spell', 'label': 'Dry Spell'},
-            ].map((s) {
+            children: scenarios.map((s) {
               final active = selectedScenario == s['key'];
               return ChoiceChip(
                 label: Text(

@@ -9,7 +9,7 @@ import 'package:villagenova/features/ask/presentation/screens/ask_screen.dart';
 import 'package:villagenova/features/space/presentation/screens/my_space_screen.dart';
 import 'package:villagenova/features/village/presentation/screens/my_village_screen.dart';
 
-void main() async {
+void main() {
   WidgetsFlutterBinding.ensureInitialized();
   runApp(
     const ProviderScope(
@@ -39,24 +39,28 @@ class _VillageNovaAppState extends State<VillageNovaApp> {
         pages: [
           if (_currentScreen == 'welcome')
             MaterialPage(
+              key: const ValueKey('welcome'),
               child: WelcomeScreen(
                 onGetStarted: () => setState(() => _currentScreen = 'phone_auth'),
               ),
             ),
           if (_currentScreen == 'phone_auth')
             MaterialPage(
+              key: const ValueKey('phone_auth'),
               child: PhoneAuthScreen(
                 onAuthSuccess: () => setState(() => _currentScreen = 'onboarding'),
               ),
             ),
           if (_currentScreen == 'onboarding')
             MaterialPage(
+              key: const ValueKey('onboarding'),
               child: OnboardingScreen(
                 onOnboardingComplete: () => setState(() => _currentScreen = 'home'),
               ),
             ),
           if (_currentScreen == 'home')
             MaterialPage(
+              key: const ValueKey('home'),
               child: HomeScreen(
                 onOpenAskAI: () {
                   Navigator.of(context).push(
@@ -81,14 +85,14 @@ class _VillageNovaAppState extends State<VillageNovaApp> {
               ),
             ),
         ],
-        onPopPage: (route, result) {
-          if (!route.didPop(result)) return false;
-          if (_currentScreen == 'phone_auth') {
+        onDidRemovePage: (page) {
+          if (page.key == const ValueKey('phone_auth') &&
+              _currentScreen == 'phone_auth') {
             setState(() => _currentScreen = 'welcome');
-          } else if (_currentScreen == 'onboarding') {
+          } else if (page.key == const ValueKey('onboarding') &&
+              _currentScreen == 'onboarding') {
             setState(() => _currentScreen = 'phone_auth');
           }
-          return true;
         },
       ),
     );
