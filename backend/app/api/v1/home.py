@@ -6,6 +6,7 @@ import uuid
 
 from app.core.database import get_db
 from app.core.security import get_current_user, AuthenticatedResident
+from app.api.v1.resident import _DEMO_PROFILES
 from app.models.resident import ResidentProfile
 from app.models.farm import Farm
 from app.schemas.home import HomeDashboardPayload, WeatherSummary, TodayActionItem, ProgressSummary
@@ -42,15 +43,24 @@ async def get_home_dashboard(
         except Exception:
             profile = None
 
-    name = profile.full_name if profile else "Ravi"
-    village_name = profile.village.name if profile and profile.village else "Ananthagiri"
+    demo_profile = _DEMO_PROFILES.get(current_user.user_id) if not profile else None
+    name = profile.full_name if profile else (demo_profile["full_name"] if demo_profile else "Ravi")
+    village_name = (
+        profile.village.name
+        if profile and profile.village
+        else (
+            demo_profile["village_name"].split("(")[0].strip()
+            if demo_profile and demo_profile.get("village_name")
+            else "Ananthagiri"
+        )
+    )
     active_crop = (
         profile.farms[0].crops[0]
         if profile and profile.farms and profile.farms[0].crops
         else None
     )
-    crop_name = active_crop.crop_name if active_crop else "Soybean"
-    crop_stage = active_crop.current_stage if active_crop else "vegetative"
+    crop_name = active_crop.crop_name if active_crop else (demo_profile.get("crop_name", "Soybean") if demo_profile else "Soybean")
+    crop_stage = active_crop.current_stage if active_crop else (demo_profile.get("crop_stage", "vegetative") if demo_profile else "vegetative")
 
     # Dynamic actions from resident tasks in DB
     if profile and profile.tasks:

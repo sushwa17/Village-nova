@@ -7,9 +7,9 @@ import 'package:villagenova/providers/home_provider.dart';
 import 'package:villagenova/models/resident_model.dart';
 
 class HomeScreen extends ConsumerStatefulWidget {
-  final VoidCallback onOpenAskAI;
-  final VoidCallback onOpenMySpace;
-  final VoidCallback onOpenVillage;
+  final Future<void> Function() onOpenAskAI;
+  final Future<void> Function() onOpenMySpace;
+  final Future<void> Function() onOpenVillage;
   final VoidCallback onOpenSchemes;
 
   const HomeScreen({
@@ -84,11 +84,18 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
       // Standard Bottom Navigation Bar
       bottomNavigationBar: NavigationBar(
         selectedIndex: _navIndex,
-        onDestinationSelected: (index) {
+        onDestinationSelected: (index) async {
           setState(() => _navIndex = index);
-          if (index == 1) widget.onOpenMySpace();
-          if (index == 2) widget.onOpenVillage();
-          if (index == 3) widget.onOpenSchemes();
+          if (index == 1) {
+            await widget.onOpenMySpace();
+            if (mounted) setState(() => _navIndex = 0);
+          } else if (index == 2) {
+            await widget.onOpenVillage();
+            if (mounted) setState(() => _navIndex = 0);
+          } else if (index == 3) {
+            widget.onOpenSchemes();
+            if (mounted) setState(() => _navIndex = 0);
+          }
         },
         destinations: const [
           NavigationDestination(

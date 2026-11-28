@@ -61,27 +61,23 @@ class _VillageNovaAppState extends State<VillageNovaApp> {
           if (_currentScreen == 'home')
             MaterialPage(
               key: const ValueKey('home'),
-              child: HomeScreen(
-                onOpenAskAI: () {
-                  Navigator.of(context).push(
+              child: Builder(
+                builder: (homeContext) => HomeScreen(
+                  onOpenAskAI: () => Navigator.of(homeContext).push(
                     MaterialPageRoute(builder: (_) => const AskVillageNovaScreen()),
-                  );
-                },
-                onOpenMySpace: () {
-                  Navigator.of(context).push(
+                  ),
+                  onOpenMySpace: () => Navigator.of(homeContext).push(
                     MaterialPageRoute(builder: (_) => const MySpaceScreen()),
-                  );
-                },
-                onOpenVillage: () {
-                  Navigator.of(context).push(
+                  ),
+                  onOpenVillage: () => Navigator.of(homeContext).push(
                     MaterialPageRoute(builder: (_) => const MyVillageScreen()),
-                  );
-                },
-                onOpenSchemes: () {
-                  ScaffoldMessenger.of(context).showSnackBar(
-                    const SnackBar(content: Text('Schemes: PM-KISAN and PMFBY matches')),
-                  );
-                },
+                  ),
+                  onOpenSchemes: () {
+                    ScaffoldMessenger.of(homeContext).showSnackBar(
+                      const SnackBar(content: Text('Schemes: PM-KISAN and PMFBY matches')),
+                    );
+                  },
+                ),
               ),
             ),
         ],

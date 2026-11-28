@@ -477,36 +477,33 @@ class _MyVillageScreenState extends ConsumerState<MyVillageScreen> {
       {'key': 'emergency', 'label': '🚨 Emergency'},
     ];
 
-    return SizedBox(
-      height: 36,
-      child: ListView.separated(
-        scrollDirection: Axis.horizontal,
-        itemCount: categories.length,
-        separatorBuilder: (_, __) => const SizedBox(width: 8),
-        itemBuilder: (context, idx) {
-          final cat = categories[idx];
-          final isSelected = selected == cat['key'];
+    return Wrap(
+      spacing: 8,
+      runSpacing: 6,
+      children: categories.map((cat) {
+        final isSelected = selected == cat['key'];
 
-          return ChoiceChip(
-            label: Text(
-              cat['label']!,
-              style: TextStyle(
-                fontSize: 11,
-                fontWeight: isSelected ? FontWeight.w800 : FontWeight.w600,
-                color: isSelected ? AppColors.primaryGreenDark : AppColors.textSecondary,
-              ),
+        return ChoiceChip(
+          label: Text(
+            cat['label']!,
+            style: TextStyle(
+              fontSize: 11,
+              fontWeight: isSelected ? FontWeight.w800 : FontWeight.w600,
+              color: isSelected ? AppColors.primaryGreenDark : AppColors.textSecondary,
             ),
-            selected: isSelected,
-            selectedColor: const Color(0xFFDCFCE7),
-            backgroundColor: Colors.white,
-            shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
-            side: BorderSide(
-              color: isSelected ? AppColors.primaryGreenLight : const Color(0xFFE5E7EB),
-            ),
-            onSelected: (_) => ref.read(villageProvider.notifier).setCategory(cat['key']!),
-          );
-        },
-      ),
+          ),
+          selected: isSelected,
+          selectedColor: const Color(0xFFDCFCE7),
+          backgroundColor: Colors.white,
+          materialTapTargetSize: MaterialTapTargetSize.shrinkWrap,
+          visualDensity: VisualDensity.compact,
+          shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
+          side: BorderSide(
+            color: isSelected ? AppColors.primaryGreenLight : const Color(0xFFE5E7EB),
+          ),
+          onSelected: (_) => ref.read(villageProvider.notifier).setCategory(cat['key']!),
+        );
+      }).toList(),
     );
   }
 

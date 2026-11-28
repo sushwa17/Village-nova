@@ -450,11 +450,21 @@ class _AskVillageNovaScreenState extends ConsumerState<AskVillageNovaScreen> {
           children: [
             IconButton(
               icon: const Icon(Icons.camera_alt_outlined, color: AppColors.primaryGreen),
-              onPressed: () {},
+              tooltip: 'Attach Leaf Symptom Scan',
+              onPressed: () {
+                const samplePrompt = 'Pest on soybean leaves: yellow mottling and whiteflies';
+                inputController.text = samplePrompt;
+                ScaffoldMessenger.of(context).showSnackBar(
+                  const SnackBar(content: Text('Leaf symptom scan attached — tap Send or edit prompt.')),
+                );
+              },
             ),
             IconButton(
               icon: const Icon(Icons.mic, color: AppColors.primaryGreen),
-              onPressed: () {},
+              tooltip: 'Voice Input Query',
+              onPressed: () {
+                handleSend('What should I do on my soybean farm today?');
+              },
             ),
             Expanded(
               child: TextField(
